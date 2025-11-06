@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Admin - Hotel Paraíso</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+         <img src="img/logo-hotel-paraiso.png" alt="Logo Hotel Paraíso">
+         </a>
+        <ul class="nav-links">
+            <li><a href="profile.html">Mi Perfil</a></li>
+            <li id="nav-logout"><a href="#" class="btn btn-secondary">Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Panel de Administración</h1>
+        </header>
+
+        <section class="dashboard-section">
+            <h2>Buscar Reservas por Cliente</h2>
+            <form id="search-dni-form">
+                <div class="form-group">
+                    <label for="search-dni">DNI del Cliente</label>
+                    <input type="number" id="search-dni" placeholder="12345678" required>
+                </div>
+                <button type="submit" class="btn">Buscar</button>
+            </form>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Buscar Reservas por Fechas</h2>
+            <form id="search-date-form">
+                <div class="form-group">
+                    <label for="search-checkin">Desde (Check-in)</label>
+                    <input type="date" id="search-checkin" required>
+                </div>
+                <div class="form-group">
+                    <label for="search-checkout">Hasta (Check-out)</label>
+                    <input type="date" id="search-checkout" required>
+                </div>
+                <button type="submit" class="btn">Buscar</button>
+            </form>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Resultados de Búsqueda</h2>
+            <div id="admin-reservations-list">
+                <table class="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>ID Reserva</th>
+                            <th>Cliente (DNI)</th>
+                            <th>Habitación</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <p id="admin-no-results" class="hidden">No se encontraron reservas con esos criterios.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

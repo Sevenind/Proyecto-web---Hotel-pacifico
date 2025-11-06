@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Hotel Paraíso</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+         <img src="img/logo-hotel-paraiso.png" alt="Logo Hotel Paraíso">
+         </a>
+        <ul class="nav-links">
+            <li class="nav-dropdown">
+                <a href="#" class="btn" id="nav-profile-trigger">Mi Perfil &#9662;</a>
+                
+                <div class="dropdown-content hidden" id="nav-profile-dropdown">
+                    <a href="#" id="open-edit-profile-modal" class="btn-secondary">Modificar Perfil</a>
+                    <a href="#" id="nav-logout" class="btn-secondary">Cerrar Sesión</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1 id="welcome-user">Bienvenido, ...</h1>
+        </header>
+
+        <section class="dashboard-section">
+            <h2>Mis Reservas</h2>
+            <div id="reservations-list">
+                <table class="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>Habitación</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <p id="no-reservations-msg" class="hidden">No tienes reservas activas.</p>
+            </div>
+        </section>
+
+        <section class="dashboard-section" id="new-reservation">
+            <h2>Crear Nueva Reserva</h2>
+            <form id="new-reservation-form">
+                <div class="form-group">
+                    <label for="checkin">Fecha de Check-in</label>
+                    <input type="date" id="checkin" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkout">Fecha de Check-out</label>
+                    <input type="date" id="checkout" required>
+                </div>
+                <div class="form-group">
+                    <label for="guests">Total de Personas</label>
+                    <input type="number" id="guests" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-type-select">Tipo de Habitación</label>
+                    <select id="room-type-select" required>
+                        <option value="">Seleccione un tipo...</option>
+                        <option value="1">Normal (King Size)</option>
+                        <option value="2">Individual</option>
+                        <option value="3">Grande (Familiar)</option>
+                        <option value="4">Suite</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Buscar Disponibilidad y Reservar</button>
+            </form>
+        </section>
+
+       <div id="edit-profile-modal" class="modal-container hidden">
+            <div class="modal-content">
+                <button class="modal-close-btn" id="close-edit-profile-modal">&times;</button>
+                
+                <section class="dashboard-section" id="edit-profile-section">
+                    <h2>Modificar mis Datos</h2>
+                    <form id="edit-profile-form">
+                        <div class="form-group">
+                            <label for="edit-email">Email</label>
+                            <input type="email" id="edit-email" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-telefono">Teléfono</label>
+                            <input type="number" id="edit-telefono" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-password">Nueva Contraseña (dejar vacío para no cambiar)</label>
+                            <input type="password" id="edit-password" placeholder="********">
+                        </div>
+                        <button type="submit" class="btn">Actualizar Datos</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
