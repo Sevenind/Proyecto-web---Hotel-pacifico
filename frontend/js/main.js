@@ -1,25 +1,28 @@
-// Variable 'global' para la URL de tu API
-// Cámbiala cuando subas tu API a producción
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1'; // Asumiendo que tu FastAPI corre en el puerto 8000
+// ==============================================================================
+// CONSTANTES GLOBALES
+// ==============================================================================
 
-// --- 1. LÓGICA DE ESTADO DE AUTENTICACIÓN ---
+// URL base de tu API de FastAPI
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+// ==============================================================================
+// EVENT LISTENER PRINCIPAL (AL CARGAR LA PÁGINA)
+// ==============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // Revisa si el usuario está logueado y actualiza el NAV
     checkLoginState();
-   // 1. Inicializar Swiper (solo si existe el contenedor en la página actual)
+
+    // --- Inicialización del Carrusel (Swiper) ---
+    // Solo se activa si estamos en index.html (donde existe .room-carousel)
     const roomCarousel = document.querySelector('.room-carousel');
     if (roomCarousel) {
         const swiper = new Swiper('.room-carousel', {
             loop: true,
-            
-            // --- (CAMBIOS AQUÍ) ---
             slidesPerView: 1, // Muestra 1 slide a la vez
-            spaceBetween: 30, // Espacio (aunque no se verá con 1 slide)
-            // --- (FIN DE CAMBIOS) ---
-            
+            spaceBetween: 30,
             centeredSlides: true, // Mantiene la slide centrada
-            
             // Botones de Navegación
             navigation: {
                 nextEl: '.swiper-button-next',
@@ -27,39 +30,36 @@ document.addEventListener('DOMContentLoaded', () => {
             },
         });
     }
-    // 2. Seleccionar todos los elementos del Modal
+
+    // --- Inicialización del Modal de Habitaciones (index.html) ---
     const roomModal = document.getElementById('room-detail-modal');
     const closeModalBtn = document.getElementById('close-room-modal');
     const modalRoomName = document.getElementById('modal-room-name');
     const modalRoomDesc = document.getElementById('modal-room-desc');
     const modalRoomCapacity = document.getElementById('modal-room-capacity');
     const modalBookBtn = document.getElementById('modal-book-now-btn');
-    
-    // 3. Seleccionar TODAS las tarjetas (las que están dentro de las slides)
     const allRoomCards = document.querySelectorAll('.swiper-slide .room-card');
 
-    // 4. Añadir listener para ABRIR el modal (a CADA tarjeta)
+    // Listener para ABRIR el modal (clic en tarjeta)
     allRoomCards.forEach(card => {
         card.addEventListener('click', () => {
             
-            // --- (NUEVO) Seleccionamos la imagen del modal ---
             const modalRoomImage = document.getElementById('modal-room-image');
             
-            // Obtener datos desde los atributos data-* que pusimos en el HTML
+            // Obtener datos desde los atributos data-* del HTML
             const name = card.dataset.name;
             const desc = card.dataset.desc;
             const capacity = card.dataset.capacity;
-            const img_src = card.dataset.img; // <-- (NUEVO) Obtenemos la ruta de la imagen
+            const img_src = card.dataset.img; 
 
             // Rellenar el modal con esa información
-            if(modalRoomImage) modalRoomImage.src = img_src; // <-- (NUEVO) Ponemos la imagen
+            if(modalRoomImage) modalRoomImage.src = img_src;
             if(modalRoomName) modalRoomName.textContent = name;
             if(modalRoomDesc) modalRoomDesc.textContent = desc;
             if(modalRoomCapacity) modalRoomCapacity.textContent = `Capacidad: ${capacity} personas.`;
 
-            // *** Esta es la lógica CLAVE que pediste (ya estaba) ***
+            // Lógica de autenticación para el botón de reservar
             const token = localStorage.getItem('userToken');
-            
             if (token) {
                 // Si está logueado, el botón va a crear-reserva
                 if(modalBookBtn) modalBookBtn.href = 'crear-reserva.html';
@@ -73,46 +73,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-
-    // 5. Añadir listener para CERRAR el modal (botón 'x')
+    // Listener para CERRAR el modal (botón 'x')
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
             if (roomModal) roomModal.classList.add('hidden');
         });
     }
 
-    // 6. Añadir listener para CERRAR el modal (clicando en el fondo)
+    // Listener para CERRAR el modal (clic en el fondo)
     if (roomModal) {
         roomModal.addEventListener('click', (e) => {
-            // Si el clic fue en el fondo (el .modal-container)
             if (e.target === roomModal) {
                 roomModal.classList.add('hidden');
             }
         });
     }
 
-
-    // Listeners para los formularios de login y registro
+    // --- Listeners para Formularios (Login, Registro, Logout) ---
+    
+    // Asigna el listener al formulario de Login (si existe en esta página)
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
     }
     
+    // Asigna el listener al formulario de Registro (si existe en esta página)
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', handleRegister);
     }
     
-    // Listener para el botón de logout (que está en varias páginas)
+    // Asigna el listener al botón de Logout (si existe en esta página)
     const logoutBtn = document.getElementById('nav-logout');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
 });
 
+// ==============================================================================
+// FUNCIONES DE ESTADO Y AUTENTICACIÓN (NAVBAR Y LOGOUT)
+// ==============================================================================
+
 /**
- * Revisa si el usuario está logueado (mirando localStorage)
- * y actualiza la barra de navegación (NAV)
+ * Revisa si existe un token en localStorage y actualiza 
+ * los botones del Navbar (NAV) en consecuencia.
  */
 function checkLoginState() {
     const userToken = localStorage.getItem('userToken');
@@ -122,7 +126,7 @@ function checkLoginState() {
     const navRegister = document.getElementById('nav-register');
     const navProfile = document.getElementById('nav-profile');
     const navLogout = document.getElementById('nav-logout');
-    const heroBookBtn = document.getElementById('hero-book-btn');
+    const heroBookBtn = document.getElementById('hero-book-btn'); // Botón del 'Hero'
 
     if (userToken) {
         // --- Usuario LOGUEADO ---
@@ -150,11 +154,26 @@ function checkLoginState() {
     }
 }
 
+/**
+ * Maneja el clic en "Cerrar Sesión".
+ * Limpia el localStorage y redirige al inicio.
+ */
+function handleLogout(e) {
+    e.preventDefault();
+    
+    // Limpiar el almacenamiento
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html'; // Redirige al inicio
+}
 
-// --- 2. MANEJADORES DE FORMULARIOS (LOGIN / REGISTRO) ---
+
+// ==============================================================================
+// FUNCIONES DE FORMULARIOS (LOGIN Y REGISTRO)
+// ==============================================================================
 
 /**
- * Maneja el envío del formulario de REGISTRO
+ * (CONECTAR API) Maneja el envío del formulario de REGISTRO
  */
 async function handleRegister(e) {
     e.preventDefault(); // Evita que la página se recargue
@@ -167,7 +186,7 @@ async function handleRegister(e) {
     const telefono = document.getElementById('telefono').value;
     const password = document.getElementById('password').value;
 
-    // Crear el cuerpo de la petición (debe coincidir con tu API)
+    // Crear el cuerpo de la petición (debe coincidir con el schema 'ClienteCreate')
     const userData = {
         dni: parseInt(dni),
         nombre: nombre,
@@ -178,9 +197,8 @@ async function handleRegister(e) {
     };
 
     try {
-        // --- CONECTAR API ---
-        // Aquí llamas a tu endpoint de FastAPI para registrar
-        // (Ej: /clientes/register)
+        // --- CONECTAR API (Registro) ---
+        // Endpoint: /clientes/register (POST)
         const response = await fetch(`${API_BASE_URL}/clientes/register`, {
             method: 'POST',
             headers: {
@@ -190,10 +208,8 @@ async function handleRegister(e) {
         });
 
         if (response.ok) {
-            // response.json() te daría el nuevo cliente
             const nuevoCliente = await response.json(); 
             console.log('Registro exitoso:', nuevoCliente);
-            alert('¡Registro exitoso! Por favor, inicia sesión.');
             window.location.href = 'login.html'; // Redirige a login
         } else {
             // Manejar errores (ej: DNI o email duplicado)
@@ -210,7 +226,7 @@ async function handleRegister(e) {
 
 
 /**
- * Maneja el envío del formulario de LOGIN
+ * (CONECTAR API) Maneja el envío del formulario de LOGIN
  */
 async function handleLogin(e) {
     e.preventDefault();
@@ -218,20 +234,19 @@ async function handleLogin(e) {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // --- (NUEVO) Obtener el elemento de error y ocultarlo ---
+    // Obtener el elemento de error y ocultarlo
     const loginErrorMsg = document.getElementById('login-error-msg');
     loginErrorMsg.classList.add('hidden'); // Ocultarlo al re-intentar
     loginErrorMsg.textContent = ''; // Limpiar texto
 
     // Para FastAPI/OAuth2, se envían datos de formulario
     const formData = new URLSearchParams();
-    formData.append('username', email);
+    formData.append('username', email); // FastAPI espera 'username' para el email
     formData.append('password', password);
 
     try {
-        // --- CONECTAR API ---
-        // Aquí llamas a tu endpoint de FastAPI para login
-        // (Ej: /token o /clientes/login)
+        // --- CONECTAR API (Login) ---
+        // Endpoint: /clientes/login/token (POST)
         const response = await fetch(`${API_BASE_URL}/clientes/login/token`, {
             method: 'POST',
             headers: {
@@ -241,50 +256,47 @@ async function handleLogin(e) {
         });
 
         if (response.ok) {
-            // Si es exitoso, FastAPI debería devolver un 'access_token'
+            // Si es exitoso, FastAPI devuelve el 'access_token'
             const data = await response.json();
             
-            // --- Guardamos el Token y los datos del usuario ---
+            // Guardamos el Token
             localStorage.setItem('userToken', data.access_token);
-            // También guardamos los datos del usuario (que vendrán de otro endpoint)
-            // Aquí simulamos que obtenemos los datos del cliente
+            
+            // Obtenemos y guardamos los datos del usuario (/me)
             await fetchAndStoreUserData(data.access_token);
 
-            // --- (ELIMINADO) Se quita el alert ---
-            
-            // --- (MODIFICADO) Redirección directa ---
+            // Redirección directa al perfil
             window.location.href = 'profile.html'; 
 
         } else {
             const error = await response.json();
             console.error('Error en login:', error);
 
-            // --- (NUEVO) Mostrar error en la página ---
+            // Mostrar error en la página
             loginErrorMsg.textContent = error.detail || 'Email o contraseña incorrectos.';
             loginErrorMsg.classList.remove('hidden');
-            
-            // --- (ELIMINADO) Se quita el alert ---
         }
     } catch (error) {
         console.error('Error de red:', error);
         
-        // --- (NUEVO) Mostrar error de red en la página ---
+        // Mostrar error de red en la página
         loginErrorMsg.textContent = 'Error de conexión. Inténtalo de nuevo.';
         loginErrorMsg.classList.remove('hidden');
-
-        // --- (ELIMINADO) Se quita el alert ---
     }
 }
 
+// ==============================================================================
+// FUNCIÓN AUXILIAR (OBTENER DATOS DE USUARIO)
+// ==============================================================================
+
 /**
- * Función auxiliar para obtener datos del usuario DESPUÉS del login
- * y guardarlos en localStorage para usarlos en el perfil.
+ * (CONECTAR API) Obtiene datos del usuario (usando el token)
+ * y los guarda en localStorage para usarlos en el perfil.
  */
 async function fetchAndStoreUserData(token) {
     try {
-        // --- CONECTAR API ---
-        // Endpoint protegido que devuelve los datos del usuario logueado
-        // (Ej: /clientes/me)
+        // --- CONECTAR API (Obtener datos del usuario) ---
+        // Endpoint: /clientes/me (GET)
         const response = await fetch(`${API_BASE_URL}/clientes/me`, {
             method: 'GET',
             headers: {
@@ -302,17 +314,4 @@ async function fetchAndStoreUserData(token) {
     } catch (error) {
         console.error(error);
     }
-}
-
-
-/**
- * Maneja el clic en "Cerrar Sesión"
- */
-function handleLogout(e) {
-    e.preventDefault();
-    
-    // Limpiar el almacenamiento
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('user');
-    window.location.href = 'index.html'; // Redirige al inicio
 }

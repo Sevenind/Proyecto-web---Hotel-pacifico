@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- 1. PROTEGER RUTA ---
+    // PROTEGER RUTA 
     // Nadie debería estar en esta página sin un token
     const token = localStorage.getItem('userToken');
     if (!token) {
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Detiene la ejecución
     }
 
-    // --- 2. Listener para el formulario de reserva ---
+    // Listener para el formulario de reserva
     const reservationForm = document.getElementById('new-reservation-form');
     if (reservationForm) {
         reservationForm.addEventListener('submit', handleNewReservation);
@@ -16,10 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-/**
- * (CONECTAR API) Maneja la creación de una nueva reserva
- * (Esta función fue movida desde profile.js)
- */
+// (CONECTAR API) Maneja la creación de una nueva reserva (Esta función fue movida desde profile.js)
+
 async function handleNewReservation(e) {
     e.preventDefault();
     const token = localStorage.getItem('userToken');
@@ -34,13 +32,9 @@ async function handleNewReservation(e) {
         total_personas: parseInt(document.getElementById('guests').value),
     };
 
-    // --- (Esto es una simplificación) ---
-    // En un sistema real, primero buscarías habitaciones disponibles
-    // y luego reservarías una 'habitacion_id' específica.
-    
     try {
-        // --- CONECTAR API ---
-        // Endpoint: /reservas/ (POST)
+        // CONECTAR API 
+        // Endpoint: /reservas/ 
         const response = await fetch(`${API_BASE_URL}/reservas/`, {
             method: 'POST',
             headers: {
