@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+peewee
+Werkzeug
+python-jose[cryptography]
+python-multipart

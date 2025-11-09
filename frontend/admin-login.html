@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Hotel Paraíso</title>
+    <title>Admin Login - Hotel Paraíso</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,33 +12,24 @@
         <a href="index.html" class="logo">
          <img src="img/logo-hotel-paraiso.png" alt="Logo Hotel Paraíso">
          </a>
-        <ul class="nav-links">
-            <li><a href="index.html">Inicio</a></li>
-        </ul>
     </nav>
 
     <div class="form-container">
-        <form id="login-form">
-            <h1>Iniciar Sesión</h1>
+        <form id="admin-login-form">
+            <h1>Acceso Admin</h1>
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" required>
+                <label for="username">Usuario</label>
+                <input type="text" id="username" required>
             </div>
             <div class="form-group">
                 <label for="password">Contraseña</label>
                 <input type="password" id="password" required>
-                <p id="login-error-msg" class="form-error-text hidden"></p>
             </div>
             <button type="submit" class="btn">Entrar</button>
-            <p class="form-text">
-                ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
-            </p>
-            <p class="form-text" style="margin-top: 0.5rem;">
-                ¿Eres administrador? <a href="admin-login.html">Inicia sesión aquí</a>
-            </p>
         </form>
     </div>
 
     <script src="js/main.js"></script>
+    <script src="js/admin-login.js"></script>
 </body>
 </html>

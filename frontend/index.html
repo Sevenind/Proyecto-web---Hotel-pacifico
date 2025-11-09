@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotel Paraíso - Inicio</title>
     <link rel="stylesheet" href="css/style.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 </head>
 <body>
 
@@ -28,43 +30,88 @@
         </div>
     </header>
 
-    <main class="container" id="room-types">
-        <h2>Nuestras Habitaciones</h2>
-        <div class="room-grid">
-            <div class="room-card">
-                <img src="img/room-normal.jpg" alt="Habitación Normal King Size">
-                <div class="room-card-content">
-                    <h3>Normal (King Size)</h3>
-                    <p>Habitación estándar con cama King Size. Capacidad: 2 personas.</p>
+   <main class="container" id="room-types">
+    <h2>Nuestras Habitaciones</h2>
+    
+    <div class="swiper room-carousel">
+        <div class="swiper-wrapper">
+            
+            <div class="swiper-slide">
+                <div class="room-card" 
+                     data-name="Normal (King Size)" 
+                     data-desc="Habitación estándar con cama King Size."
+                     data-capacity="2"
+                     data-img="img/hab-normal.png"> <img src="img/hab-normal.png" alt="Habitación Normal King Size"> 
+                    <div class="room-card-content">
+                        <h3>Normal (King Size)</h3>
+                        <p>Habitación estándar con cama King Size. Capacidad: 2 personas.</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="room-card">
-                <img src="img/room-individual.jpg" alt="Habitación Individual">
-                <div class="room-card-content">
-                    <h3>Individual</h3>
-                    <p>Habitación cómoda para una persona. Capacidad: 1 persona.</p>
+            <div class="swiper-slide">
+                <div class="room-card" 
+                     data-name="Individual" 
+                     data-desc="Habitación cómoda para una persona."
+                     data-capacity="1"
+                     data-img="img/hab-individual.png"> <img src="img/hab-individual.png" alt="Habitación Individual">
+                    <div class="room-card-content">
+                        <h3>Individual</h3>
+                        <p>Habitación cómoda para una persona. Capacidad: 1 persona.</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="room-card">
-                <img src="img/room-familiar.jpg" alt="Habitación Grande (Familiar)">
-                <div class="room-card-content">
-                    <h3>Grande (Familiar)</h3>
-                    <p>Habitación amplia para familias. Capacidad: 4 personas.</p>
+            <div class="swiper-slide">
+                 <div class="room-card" 
+                     data-name="Grande (Familiar)" 
+                     data-desc="Habitación amplia para familias."
+                     data-capacity="4"
+                     data-img="img/hab-familiar.png"> <img src="img/hab-familiar.png" alt="Habitación Grande (Familiar)">
+                    <div class="room-card-content">
+                        <h3>Grande (Familiar)</h3>
+                        <p>Habitación amplia para familias. Capacidad: 4 personas.</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="room-card">
-                <img src="img/room-suite.jpg" alt="Suite de lujo">
-                <div class="room-card-content">
-                    <h3>Suite</h3>
-                    <p>Suite de lujo con sala de estar. Capacidad: 3 personas.</p>
+            <div class="swiper-slide">
+                <div class="room-card" 
+                     data-name="Suite" 
+                     data-desc="Suite de lujo con sala de estar."
+                     data-capacity="3"
+                     data-img="img/hab-suite.png"> <img src="img/hab-suite.png" alt="Suite de lujo">
+                    <div class="room-card-content">
+                        <h3>Suite</h3>
+                        <p>Suite de lujo con sala de estar. Capacidad: 3 personas.</p>
+                    </div>
                 </div>
             </div>
+
         </div>
-    </main>
+        
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+</main>
+
+    <div id="room-detail-modal" class="modal-container hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="close-room-modal">&times;</button>
+            
+            <img id="modal-room-image" src="" alt="Imagen de la habitación" class="modal-room-img">
+            
+            <h2 id="modal-room-name"></h2>
+            <p id="modal-room-desc" style="margin-top: 1rem;"></p>
+            <p id="modal-room-capacity" style="margin-top: 0.5rem; font-weight: bold;"></p>
+            
+            <a href="#" id="modal-book-now-btn" class="btn" style="margin-top: 1.5rem; width: 100%; text-align: center;">
+                Reservar Ahora
+            </a>
+        </div>
+    </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>  
     <script src="js/main.js"></script>
 </body>
 </html>

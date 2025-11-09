@@ -7,6 +7,90 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api/v1'; // Asumiendo que tu FastAPI
 document.addEventListener('DOMContentLoaded', () => {
     
     checkLoginState();
+   // 1. Inicializar Swiper (solo si existe el contenedor en la página actual)
+    const roomCarousel = document.querySelector('.room-carousel');
+    if (roomCarousel) {
+        const swiper = new Swiper('.room-carousel', {
+            loop: true,
+            
+            // --- (CAMBIOS AQUÍ) ---
+            slidesPerView: 1, // Muestra 1 slide a la vez
+            spaceBetween: 30, // Espacio (aunque no se verá con 1 slide)
+            // --- (FIN DE CAMBIOS) ---
+            
+            centeredSlides: true, // Mantiene la slide centrada
+            
+            // Botones de Navegación
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+    }
+    // 2. Seleccionar todos los elementos del Modal
+    const roomModal = document.getElementById('room-detail-modal');
+    const closeModalBtn = document.getElementById('close-room-modal');
+    const modalRoomName = document.getElementById('modal-room-name');
+    const modalRoomDesc = document.getElementById('modal-room-desc');
+    const modalRoomCapacity = document.getElementById('modal-room-capacity');
+    const modalBookBtn = document.getElementById('modal-book-now-btn');
+    
+    // 3. Seleccionar TODAS las tarjetas (las que están dentro de las slides)
+    const allRoomCards = document.querySelectorAll('.swiper-slide .room-card');
+
+    // 4. Añadir listener para ABRIR el modal (a CADA tarjeta)
+    allRoomCards.forEach(card => {
+        card.addEventListener('click', () => {
+            
+            // --- (NUEVO) Seleccionamos la imagen del modal ---
+            const modalRoomImage = document.getElementById('modal-room-image');
+            
+            // Obtener datos desde los atributos data-* que pusimos en el HTML
+            const name = card.dataset.name;
+            const desc = card.dataset.desc;
+            const capacity = card.dataset.capacity;
+            const img_src = card.dataset.img; // <-- (NUEVO) Obtenemos la ruta de la imagen
+
+            // Rellenar el modal con esa información
+            if(modalRoomImage) modalRoomImage.src = img_src; // <-- (NUEVO) Ponemos la imagen
+            if(modalRoomName) modalRoomName.textContent = name;
+            if(modalRoomDesc) modalRoomDesc.textContent = desc;
+            if(modalRoomCapacity) modalRoomCapacity.textContent = `Capacidad: ${capacity} personas.`;
+
+            // *** Esta es la lógica CLAVE que pediste (ya estaba) ***
+            const token = localStorage.getItem('userToken');
+            
+            if (token) {
+                // Si está logueado, el botón va a crear-reserva
+                if(modalBookBtn) modalBookBtn.href = 'crear-reserva.html';
+            } else {
+                // Si NO está logueado, el botón va a registrarse
+                if(modalBookBtn) modalBookBtn.href = 'register.html';
+            }
+
+            // Mostrar el modal
+            if (roomModal) roomModal.classList.remove('hidden');
+        });
+    });
+
+
+    // 5. Añadir listener para CERRAR el modal (botón 'x')
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            if (roomModal) roomModal.classList.add('hidden');
+        });
+    }
+
+    // 6. Añadir listener para CERRAR el modal (clicando en el fondo)
+    if (roomModal) {
+        roomModal.addEventListener('click', (e) => {
+            // Si el clic fue en el fondo (el .modal-container)
+            if (e.target === roomModal) {
+                roomModal.classList.add('hidden');
+            }
+        });
+    }
+
 
     // Listeners para los formularios de login y registro
     const loginForm = document.getElementById('login-form');
@@ -134,6 +218,11 @@ async function handleLogin(e) {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
+    // --- (NUEVO) Obtener el elemento de error y ocultarlo ---
+    const loginErrorMsg = document.getElementById('login-error-msg');
+    loginErrorMsg.classList.add('hidden'); // Ocultarlo al re-intentar
+    loginErrorMsg.textContent = ''; // Limpiar texto
+
     // Para FastAPI/OAuth2, se envían datos de formulario
     const formData = new URLSearchParams();
     formData.append('username', email);
@@ -161,17 +250,29 @@ async function handleLogin(e) {
             // Aquí simulamos que obtenemos los datos del cliente
             await fetchAndStoreUserData(data.access_token);
 
-            alert('¡Inicio de sesión exitoso!');
-            window.location.href = 'profile.html'; // Redirige al perfil
+            // --- (ELIMINADO) Se quita el alert ---
+            
+            // --- (MODIFICADO) Redirección directa ---
+            window.location.href = 'profile.html'; 
 
         } else {
             const error = await response.json();
             console.error('Error en login:', error);
-            alert(`Error: ${error.detail || 'Email o contraseña incorrectos.'}`);
+
+            // --- (NUEVO) Mostrar error en la página ---
+            loginErrorMsg.textContent = error.detail || 'Email o contraseña incorrectos.';
+            loginErrorMsg.classList.remove('hidden');
+            
+            // --- (ELIMINADO) Se quita el alert ---
         }
     } catch (error) {
         console.error('Error de red:', error);
-        alert('Error de conexión. Inténtalo de nuevo.');
+        
+        // --- (NUEVO) Mostrar error de red en la página ---
+        loginErrorMsg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        loginErrorMsg.classList.remove('hidden');
+
+        // --- (ELIMINADO) Se quita el alert ---
     }
 }
 
@@ -213,7 +314,5 @@ function handleLogout(e) {
     // Limpiar el almacenamiento
     localStorage.removeItem('userToken');
     localStorage.removeItem('user');
-    
-    alert('Has cerrado sesión.');
     window.location.href = 'index.html'; // Redirige al inicio
 }

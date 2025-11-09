@@ -5,14 +5,17 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Protección simple (debería ser por ROL)
-    const token = localStorage.getItem('userToken');
+    // --- (CAMBIO 1) ---
+    // Protección simple: Busca el 'adminToken' que creamos
+    const token = localStorage.getItem('adminToken');
     if (!token) {
-        window.location.href = 'login.html';
+        // (CAMBIO 2) Si no lo tiene, lo manda al login de admin
+        window.location.href = 'admin-login.html';
         return;
     }
+    // --- (FIN DE CAMBIOS) ---
 
-    // Listeners para los formularios de búsqueda
+    // Listeners para los formularios de búsqueda (esto queda igual)
     document.getElementById('search-dni-form').addEventListener('submit', searchByDni);
     document.getElementById('search-date-form').addEventListener('submit', searchByDate);
 });
@@ -44,7 +47,12 @@ async function searchByDate(e) {
  * Función genérica para llamar a la API de admin y mostrar resultados
  */
 async function fetchAndDisplayReservations(url) {
-    const token = localStorage.getItem('userToken');
+    
+    // --- (CAMBIO 3) ---
+    // Usa el 'adminToken' para hacer la llamada a la API
+    const token = localStorage.getItem('adminToken');
+    // --- (FIN DE CAMBIO) ---
+    
     const tableBody = document.querySelector('#admin-reservations-list tbody');
     const noResultsMsg = document.getElementById('admin-no-results');
 
@@ -79,6 +87,8 @@ async function fetchAndDisplayReservations(url) {
         } else {
              noResultsMsg.classList.remove('hidden');
              tableBody.innerHTML = '';
+             // El error 401 (No autorizado) de la API de admin
+             // ahora se mostrará aquí
              alert('Error buscando reservas o no tienes permisos.');
         }
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Reserva - Hotel Paraíso</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+         <img src="img/logo-hotel-paraiso.png" alt="Logo Hotel Paraíso">
+         </a>
+        <ul class="nav-links">
+            <li class="nav-dropdown">
+                <a href="profile.html" class="btn">Mi Perfil</a>
+                
+                </li>
+        </ul>
+    </nav>
+
+    <div class="dashboard-container">
+        
+        <section class="dashboard-section" id="new-reservation">
+            <h2>Crear Nueva Reserva</h2>
+            <form id="new-reservation-form">
+                <div class="form-group">
+                    <label for="checkin">Fecha de Check-in</label>
+                    <input type="date" id="checkin" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkout">Fecha de Check-out</label>
+                    <input type="date" id="checkout" required>
+                </div>
+                <div class="form-group">
+                    <label for="guests">Total de Personas</label>
+                    <input type="number" id="guests" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-type-select">Tipo de Habitación</label>
+                    <select id="room-type-select" required>
+                        <option value="">Seleccione un tipo...</option>
+                        <option value="1">Normal (King Size)</option>
+                        <option value="2">Individual</option>
+                        <option value="3">Grande (Familiar)</option>
+                        <option value="4">Suite</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Buscar Disponibilidad y Reservar</button>
+            </form>
+        </section>
+
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/crear-reserva.js"></script>
+</body>
+</html>

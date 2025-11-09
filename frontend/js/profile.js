@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
     // --- (NUEVO) Listeners para el Modal de Edición de Perfil ---
+    // (Este es el bloque correcto. El duplicado ha sido eliminado)
     const openModalBtn = document.getElementById('open-edit-profile-modal');
     const closeModalBtn = document.getElementById('close-edit-profile-modal');
     const modalContainer = document.getElementById('edit-profile-modal');
@@ -48,8 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    
     // --- 1. PROTEGER RUTA ---
-    // Si no hay token, no debería estar aquí. Lo echamos a 'login.html'.
     const token = localStorage.getItem('userToken');
     if (!token) {
         window.location.href = 'login.html';
@@ -64,9 +64,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('edit-profile-form');
     editForm.addEventListener('submit', handleEditProfile);
     
-    const reservationForm = document.getElementById('new-reservation-form');
-    reservationForm.addEventListener('submit', handleNewReservation);
-});
+    // --- (ELIMINADO) ---
+    // const reservationForm = document.getElementById('new-reservation-form');
+    // reservationForm.addEventListener('submit', handleNewReservation);
+    // --- (FIN ELIMINADO) ---
+
+    // --- (NUEVO) Listeners para Acciones de Reserva (Modificar/Cancelar) ---
+    // (Estos los habíamos añadido en pasos anteriores y también van aquí)
+    const tableBody = document.querySelector('#reservations-list tbody');
+    if (tableBody) {
+        tableBody.addEventListener('click', handleReservationActions);
+    }
+    
+    const editReservaForm = document.getElementById('edit-reserva-form');
+    if (editReservaForm) {
+        editReservaForm.addEventListener('submit', handleEditReservation);
+    }
+    
+    // ==================================================================
+    // ¡¡¡AQUÍ TERMINA EL 'DOMContentLoaded'!!!
+    // ==================================================================
+  
+}); // <<--- ESTA ES LA LLAVE DE CIERRE CORRECTA
+
 
 
 /**
@@ -113,14 +133,24 @@ async function loadUserReservations() {
             } else {
                 noReservationsMsg.classList.add('hidden');
                 reservas.forEach(reserva => {
+                   // --- MODIFICAR ESTA PLANTILLA OTRA VEZ (Versión con iconos dentro de botones) ---
                     const row = `
                         <tr>
                             <td>Habitación #${reserva.habitacion.numero} (${reserva.habitacion.tipo.nombre_tipo})</td>
                             <td>${reserva.fecha_checkin}</td>
                             <td>${reserva.fecha_checkout}</td>
                             <td>${reserva.estado_reserva}</td>
+                            <td>
+                                <button class="btn btn-small btn-modify" data-id="${reserva.id}">
+                                    <img src="img/edit-icon.png" alt="Modificar Reserva">
+                                </button>
+                                <button class="btn btn-small btn-danger" data-id="${reserva.id}">
+                                    <img src="img/cancel-icon.png" alt="Cancelar Reserva">
+                                </button>
+                            </td>
                         </tr>
                     `;
+                    //
                     tableBody.innerHTML += row;
                 });
             }
@@ -191,32 +221,109 @@ async function handleEditProfile(e) {
 }
 
 
+// --- (ELIMINADO) ---
+// La función 'handleNewReservation' se ha movido
+// a 'js/crear-reserva.js'
+// --- (FIN ELIMINADO) ---
+
+
+function handleReservationActions(e) {
+    const token = localStorage.getItem('userToken');
+    if (!token) return;
+
+    // Detectar si se hizo clic en un botón de cancelar
+    const cancelBtn = e.target.closest('.btn-danger');
+    if (cancelBtn) {
+        const reservaId = cancelBtn.dataset.id;
+        if (confirm(`¿Estás seguro de que quieres cancelar la reserva ${reservaId}?`)) {
+            handleCancelReservation(reservaId, token);
+        }
+    }
+
+    // Detectar si se hizo clic en un botón de modificar
+    const modifyBtn = e.target.closest('.btn-modify');
+    if (modifyBtn) {
+        const reservaId = modifyBtn.dataset.id;
+        
+        // Necesitamos los datos de la fila
+        const row = modifyBtn.closest('tr');
+        const checkin = row.cells[1].textContent;
+        const checkout = row.cells[2].textContent;
+        // Asumimos que el total de personas no se muestra, así que lo pediremos
+        
+        showEditReservationModal(reservaId, checkin, checkout);
+    }
+}
+
 /**
- * (CONECTAR API) Maneja la creación de una nueva reserva
+ * (NUEVO) Muestra y Rellena el modal para editar una reserva
  */
-async function handleNewReservation(e) {
+function showEditReservationModal(reservaId, checkin, checkout) {
+    const modal = document.getElementById('edit-reserva-modal');
+    
+    // Rellenamos el formulario del modal
+    document.getElementById('edit-reserva-id').value = reservaId;
+    document.getElementById('edit-reserva-checkin').value = checkin;
+    document.getElementById('edit-reserva-checkout').value = checkout;
+    document.getElementById('edit-reserva-guests').value = ''; // Pedir nuevo total
+
+    // Mostramos el modal
+    modal.classList.remove('hidden');
+
+    // Listener para el botón de cerrar (el modal ya lo tiene en el HTML)
+    const closeModalBtn = document.getElementById('close-edit-reserva-modal');
+    closeModalBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+}
+
+
+/**
+ * (NUEVO) Llama a la API para CANCELAR una reserva
+ */
+async function handleCancelReservation(reservaId, token) {
+    try {
+        // --- CONECTAR API ---
+        // Endpoint: /reservas/{reserva_id} (DELETE)
+        const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            alert('¡Reserva cancelada con éxito!');
+            loadUserReservations(); // Recargamos la lista
+        } else {
+            const error = await response.json();
+            alert(`Error al cancelar: ${error.detail || 'No se pudo cancelar'}`);
+        }
+    } catch (error) {
+        console.error('Error cancelando reserva:', error);
+    }
+}
+
+/**
+ * (NUEVO) Llama a la API para MODIFICAR una reserva (submit del modal)
+ */
+async function handleEditReservation(e) {
     e.preventDefault();
     const token = localStorage.getItem('userToken');
 
-    // Datos del formulario de reserva
+    // Datos del formulario del MODAL
+    const reservaId = document.getElementById('edit-reserva-id').value;
     const data = {
-        // El DNI del cliente se saca del Token en el backend
-        // habitacion_id: (Necesitarías lógica para buscar habitaciones disponibles)
-        tipo_habitacion_id: parseInt(document.getElementById('room-type-select').value),
-        fecha_checkin: document.getElementById('checkin').value,
-        fecha_checkout: document.getElementById('checkout').value,
-        total_personas: parseInt(document.getElementById('guests').value),
+        fecha_checkin: document.getElementById('edit-reserva-checkin').value,
+        fecha_checkout: document.getElementById('edit-reserva-checkout').value,
+        total_personas: parseInt(document.getElementById('edit-reserva-guests').value),
     };
 
-    // --- (Esto es una simplificación) ---
-    // En un sistema real, primero buscarías habitaciones disponibles
-    // y luego reservarías una 'habitacion_id' específica.
-    
     try {
         // --- CONECTAR API ---
-        // Endpoint: /reservas/ (POST)
-        const response = await fetch(`${API_BASE_URL}/reservas/`, {
-            method: 'POST',
+        // Endpoint: /reservas/{reserva_id} (PUT)
+        const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -225,17 +332,16 @@ async function handleNewReservation(e) {
         });
 
         if (response.ok) {
-            const nuevaReserva = await response.json();
-            alert(`¡Reserva ${nuevaReserva.id} creada con éxito!`);
-            loadUserReservations(); // Recargamos la lista de reservas
-            // Limpiar formulario
-            e.target.reset();
+            alert('¡Reserva modificada con éxito!');
+            loadUserReservations(); // Recargamos la lista
+            // Ocultamos el modal
+            document.getElementById('edit-reserva-modal').classList.add('hidden');
         } else {
             const error = await response.json();
-            alert(`Error al reservar: ${error.detail || 'No disponible'}`);
+            alert(`Error al modificar: ${error.detail || 'No disponible o datos incorrectos'}`);
         }
         
     } catch (error) {
-        console.error('Error creando reserva:', error);
+        console.error('Error modificando reserva:', error);
     }
 }

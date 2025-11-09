@@ -28,7 +28,10 @@
         <header class="dashboard-header">
             <h1 id="welcome-user">Bienvenido, ...</h1>
         </header>
-
+        
+        <section class="dashboard-section" style="margin-bottom: 2rem; padding: 1.5rem; text-align: center;">
+            <a href="crear-reserva.html" class="btn" style="font-size: 1.1rem; padding: 0.8rem 2rem;">+ Crear Nueva Reserva</a>
+        </section>
         <section class="dashboard-section">
             <h2>Mis Reservas</h2>
             <div id="reservations-list">
@@ -39,6 +42,7 @@
                             <th>Check-in</th>
                             <th>Check-out</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,36 +52,7 @@
             </div>
         </section>
 
-        <section class="dashboard-section" id="new-reservation">
-            <h2>Crear Nueva Reserva</h2>
-            <form id="new-reservation-form">
-                <div class="form-group">
-                    <label for="checkin">Fecha de Check-in</label>
-                    <input type="date" id="checkin" required>
-                </div>
-                <div class="form-group">
-                    <label for="checkout">Fecha de Check-out</label>
-                    <input type="date" id="checkout" required>
-                </div>
-                <div class="form-group">
-                    <label for="guests">Total de Personas</label>
-                    <input type="number" id="guests" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="room-type-select">Tipo de Habitación</label>
-                    <select id="room-type-select" required>
-                        <option value="">Seleccione un tipo...</option>
-                        <option value="1">Normal (King Size)</option>
-                        <option value="2">Individual</option>
-                        <option value="3">Grande (Familiar)</option>
-                        <option value="4">Suite</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Buscar Disponibilidad y Reservar</button>
-            </form>
-        </section>
-
-       <div id="edit-profile-modal" class="modal-container hidden">
+        <div id="edit-profile-modal" class="modal-container hidden">
             <div class="modal-content">
                 <button class="modal-close-btn" id="close-edit-profile-modal">&times;</button>
                 
@@ -103,7 +78,37 @@
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <div id="edit-profile-modal" class="modal-container hidden">
+            </div>
+       
+       <div id="edit-reserva-modal" class="modal-container hidden">
+            <div class="modal-content">
+                <button class="modal-close-btn" id="close-edit-reserva-modal">&times;</button>
+                
+                <section class="dashboard-section" id="edit-reserva-section">
+                    <h2>Modificar Reserva</h2>
+                    <form id="edit-reserva-form">
+                        
+                        <input type="hidden" id="edit-reserva-id">
+                        
+                        <div class="form-group">
+                            <label for="edit-reserva-checkin">Nueva Fecha de Check-in</label>
+                            <input type="date" id="edit-reserva-checkin" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-reserva-checkout">Nueva Fecha de Check-out</label>
+                            <input type="date" id="edit-reserva-checkout" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-reserva-guests">Nuevo Total de Personas</label>
+                            <input type="number" id="edit-reserva-guests" min="1" required>
+                        </div>
+                        <button type="submit" class="btn">Actualizar Reserva</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+        </div> <script src="js/main.js"></script>
     <script src="js/profile.js"></script>
 </body>
 </html>
