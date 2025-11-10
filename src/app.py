@@ -30,11 +30,9 @@ app = FastAPI()
 
 #  Lista de orígenes permitidos (para que el frontend se conecte) 
 origins = [
-    "http://localhost",
     "http://localhost:5500",
-    "http://127.0.0.1",
-    "http://127.0.0.1:5500",
-    "null"
+    "http://127.0.0.1:5500"
+    
 ]
 
 #  Aplicar el middleware de CORS 
@@ -152,7 +150,7 @@ class Token(BaseModel):
 esquema_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/clientes/iniciar_sesion")
 
 # Constantes de seguridad 
-CLAVE_SECRETA = "tu-clave-secreta-muy-larga-y-dificil-de-adivinar" 
+CLAVE_SECRETA = "m!8$zKq@9#R2bT(7G%5vPqR!fTjWnZr4u7x!A%D*G-KaPdSgVkYp3s" 
 ALGORITMO = "HS256"
 MINUTOS_EXPIRACION_TOKEN = 60 # El token durará 1 hora
 
