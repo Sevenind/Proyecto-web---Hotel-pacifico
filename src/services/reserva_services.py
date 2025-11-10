@@ -216,18 +216,22 @@ def obtener_reservas_por_dni_admin(dni_cliente: int) -> List[Reserva]:
     
     Realiza JOINs para incluir datos de Cliente, Habitación y Tipo,
     necesarios para el schema 'ReservaPublicaAdmin'.
+    
+    (Ahora filtra las canceladas)
     """
     try:
-        # Hacemos join con Cliente, luego volvemos a Reserva (switch)
-        # para hacer los otros joins.
         query = (Reserva
                  .select()
                  .join(Cliente)
                  .switch(Reserva) 
                  .join(Habitacion)
                  .join(TipoHabitacion)
-                 .where(Reserva.cliente == dni_cliente)
+                 .where(
+                     (Reserva.cliente == dni_cliente) & 
+                     (Reserva.estado_reserva != 'Cancelada')
+                 )
                  .order_by(Reserva.fecha_checkin.desc()))
+    
         
         return list(query)
 
@@ -249,7 +253,8 @@ def obtener_reservas_por_fechas_admin(fecha_inicio: date, fecha_fin: date) -> Li
                  .join(TipoHabitacion)
                  .where(
                      (Reserva.fecha_checkin < fecha_fin) &
-                     (Reserva.fecha_checkout > fecha_inicio)
+                     (Reserva.fecha_checkout > fecha_inicio) &
+                     (Reserva.estado_reserva != 'Cancelada')
                  )
                  .order_by(Reserva.fecha_checkin.asc()))
         return list(query)

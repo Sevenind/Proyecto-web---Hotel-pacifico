@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // PROTEGER RUTA 
-    // Nadie debería estar en esta página sin un token
     const token = localStorage.getItem('userToken');
     if (!token) {
         window.location.href = 'login.html';
@@ -11,21 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listener para el formulario de reserva
     const reservationForm = document.getElementById('new-reservation-form');
     if (reservationForm) {
-        reservationForm.addEventListener('submit', handleNewReservation);
+        reservationForm.addEventListener('submit', manejarNuevaReserva); 
     }
 });
 
 
-// (CONECTAR API) Maneja la creación de una nueva reserva (Esta función fue movida desde profile.js)
-
-async function handleNewReservation(e) {
+// (CONECTAR API) Maneja la creación de una nueva reserva
+async function manejarNuevaReserva(e) { 
     e.preventDefault();
     const token = localStorage.getItem('userToken');
 
-    // Datos del formulario de reserva
     const data = {
-        // El DNI del cliente se saca del Token en el backend
-        // habitacion_id: (Necesitarías lógica para buscar habitaciones disponibles)
         tipo_habitacion_id: parseInt(document.getElementById('room-type-select').value),
         fecha_checkin: document.getElementById('checkin').value,
         fecha_checkout: document.getElementById('checkout').value,
@@ -34,7 +29,7 @@ async function handleNewReservation(e) {
 
     try {
         // CONECTAR API 
-        // Endpoint: /reservas/ 
+        // Endpoint: /reservas/ (POST)
         const response = await fetch(`${API_BASE_URL}/reservas/`, {
             method: 'POST',
             headers: {
@@ -48,11 +43,8 @@ async function handleNewReservation(e) {
             const nuevaReserva = await response.json();
             alert(`¡Reserva ${nuevaReserva.id} creada con éxito!`);
             
-            // Opcional: Redirigir al perfil para ver la reserva
             window.location.href = 'profile.html';
             
-            // Limpiar formulario
-            // e.target.reset(); // No es necesario si redirigimos
         } else {
             const error = await response.json();
             alert(`Error al reservar: ${error.detail || 'No disponible'}`);

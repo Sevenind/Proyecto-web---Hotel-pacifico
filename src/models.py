@@ -48,10 +48,7 @@ class Reserva(BaseModel):
         table_name = 'reservas'
         
 class Admin(BaseModel):
-    """
-    (NUEVO) Modelo para el usuario Administrador.
-    Separado de los Clientes.
-    """
+    
     id = peewee.AutoField()
     username = peewee.CharField(max_length=100, unique=True, index=True)
     password = peewee.CharField(max_length=255) # Guarda el hash

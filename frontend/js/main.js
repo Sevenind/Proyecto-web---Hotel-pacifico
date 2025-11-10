@@ -1,29 +1,22 @@
-// ==============================================================================
-// CONSTANTES GLOBALES
-// ==============================================================================
-
-// URL base de tu API de FastAPI
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 // ==============================================================================
-// EVENT LISTENER PRINCIPAL (AL CARGAR LA PÁGINA)
+// EVENTLISTENER PRINCIPAL (AL CARGAR LA PÁGINA)
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     
     // Revisa si el usuario está logueado y actualiza el NAV
-    checkLoginState();
+    verificarEstadoLogin(); 
 
-    // --- Inicialización del Carrusel (Swiper) ---
-    // Solo se activa si estamos en index.html (donde existe .room-carousel)
+    //  Inicialización del Carrusel (Swiper) 
     const roomCarousel = document.querySelector('.room-carousel');
     if (roomCarousel) {
         const swiper = new Swiper('.room-carousel', {
             loop: true,
-            slidesPerView: 1, // Muestra 1 slide a la vez
+            slidesPerView: 1, 
             spaceBetween: 30,
-            centeredSlides: true, // Mantiene la slide centrada
-            // Botones de Navegación
+            centeredSlides: true, 
             navigation: {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
@@ -31,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Inicialización del Modal de Habitaciones (index.html) ---
+    //  Inicialización del Modal de Habitaciones (index.html) 
+    // (Esta parte no usa la API, se queda igual)
     const roomModal = document.getElementById('room-detail-modal');
     const closeModalBtn = document.getElementById('close-room-modal');
     const modalRoomName = document.getElementById('modal-room-name');
@@ -40,47 +34,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBookBtn = document.getElementById('modal-book-now-btn');
     const allRoomCards = document.querySelectorAll('.swiper-slide .room-card');
 
-    // Listener para ABRIR el modal (clic en tarjeta)
     allRoomCards.forEach(card => {
         card.addEventListener('click', () => {
             
             const modalRoomImage = document.getElementById('modal-room-image');
-            
-            // Obtener datos desde los atributos data-* del HTML
             const name = card.dataset.name;
             const desc = card.dataset.desc;
             const capacity = card.dataset.capacity;
             const img_src = card.dataset.img; 
 
-            // Rellenar el modal con esa información
             if(modalRoomImage) modalRoomImage.src = img_src;
             if(modalRoomName) modalRoomName.textContent = name;
             if(modalRoomDesc) modalRoomDesc.textContent = desc;
             if(modalRoomCapacity) modalRoomCapacity.textContent = `Capacidad: ${capacity} personas.`;
 
-            // Lógica de autenticación para el botón de reservar
             const token = localStorage.getItem('userToken');
             if (token) {
-                // Si está logueado, el botón va a crear-reserva
                 if(modalBookBtn) modalBookBtn.href = 'crear-reserva.html';
             } else {
-                // Si NO está logueado, el botón va a registrarse
                 if(modalBookBtn) modalBookBtn.href = 'register.html';
             }
 
-            // Mostrar el modal
             if (roomModal) roomModal.classList.remove('hidden');
         });
     });
 
-    // Listener para CERRAR el modal (botón 'x')
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
             if (roomModal) roomModal.classList.add('hidden');
         });
     }
-
-    // Listener para CERRAR el modal (clic en el fondo)
     if (roomModal) {
         roomModal.addEventListener('click', (e) => {
             if (e.target === roomModal) {
@@ -89,24 +72,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Listeners para Formularios (Login, Registro, Logout) ---
+    // Listeners para Formularios (Login, Registro, Logout) 
     
-    // Asigna el listener al formulario de Login (si existe en esta página)
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
+        loginForm.addEventListener('submit', manejarLogin); 
     }
     
-    // Asigna el listener al formulario de Registro (si existe en esta página)
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
-        registerForm.addEventListener('submit', handleRegister);
+        registerForm.addEventListener('submit', manejarRegistro); 
     }
     
-    // Asigna el listener al botón de Logout (si existe en esta página)
     const logoutBtn = document.getElementById('nav-logout');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtn.addEventListener('click', manejarLogout); 
     }
 });
 
@@ -114,11 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // FUNCIONES DE ESTADO Y AUTENTICACIÓN (NAVBAR Y LOGOUT)
 // ==============================================================================
 
-/**
- * Revisa si existe un token en localStorage y actualiza 
- * los botones del Navbar (NAV) en consecuencia.
- */
-function checkLoginState() {
+// Revisa si existe un token en localStorage y actualiza los botones del Navbar (NAV) en consecuencia.
+function verificarEstadoLogin() { 
     const userToken = localStorage.getItem('userToken');
     
     // IDs de los botones del NAV
@@ -126,44 +103,42 @@ function checkLoginState() {
     const navRegister = document.getElementById('nav-register');
     const navProfile = document.getElementById('nav-profile');
     const navLogout = document.getElementById('nav-logout');
-    const heroBookBtn = document.getElementById('hero-book-btn'); // Botón del 'Hero'
+    const heroBookBtn = document.getElementById('hero-book-btn'); 
 
     if (userToken) {
-        // --- Usuario LOGUEADO ---
+        //  Usuario LOGUEADO 
         if (navLogin) navLogin.classList.add('hidden');
         if (navRegister) navRegister.classList.add('hidden');
         if (navProfile) navProfile.classList.remove('hidden');
         if (navLogout) navLogout.classList.remove('hidden');
         
-        // El botón de "Reservar" ahora lleva al perfil
         if (heroBookBtn) {
             heroBookBtn.href = "profile.html#new-reservation";
         }
         
     } else {
-        // --- Usuario NO LOGUEADO ---
+        //  Usuario NO LOGUEADO 
         if (navLogin) navLogin.classList.remove('hidden');
         if (navRegister) navRegister.classList.remove('hidden');
         if (navProfile) navProfile.classList.add('hidden');
         if (navLogout) navLogout.classList.add('hidden');
 
-        // El botón de "Reservar" lleva al registro
         if (heroBookBtn) {
             heroBookBtn.href = "register.html";
         }
     }
 }
 
-/**
- * Maneja el clic en "Cerrar Sesión".
- * Limpia el localStorage y redirige al inicio.
- */
-function handleLogout(e) {
+// Maneja el clic en "Cerrar Sesión" limpia el localStorage y redirige al inicio.
+function manejarLogout(e) { 
     e.preventDefault();
     
-    // Limpiar el almacenamiento
     localStorage.removeItem('userToken');
     localStorage.removeItem('user');
+    
+    // También limpiamos el token de admin, por si acaso
+    localStorage.removeItem('adminToken'); 
+    
     window.location.href = 'index.html'; // Redirige al inicio
 }
 
@@ -172,10 +147,8 @@ function handleLogout(e) {
 // FUNCIONES DE FORMULARIOS (LOGIN Y REGISTRO)
 // ==============================================================================
 
-/**
- * (CONECTAR API) Maneja el envío del formulario de REGISTRO
- */
-async function handleRegister(e) {
+// (CONECTAR API) Maneja el envío del formulario de REGISTRO
+async function manejarRegistro(e) { // <-- CAMBIADO
     e.preventDefault(); // Evita que la página se recargue
 
     // Obtener datos del formulario de registro
@@ -186,7 +159,6 @@ async function handleRegister(e) {
     const telefono = document.getElementById('telefono').value;
     const password = document.getElementById('password').value;
 
-    // Crear el cuerpo de la petición (debe coincidir con el schema 'ClienteCreate')
     const userData = {
         dni: parseInt(dni),
         nombre: nombre,
@@ -197,9 +169,9 @@ async function handleRegister(e) {
     };
 
     try {
-        // --- CONECTAR API (Registro) ---
-        // Endpoint: /clientes/register (POST)
-        const response = await fetch(`${API_BASE_URL}/clientes/register`, {
+        // CONECTAR API (Registro)
+        // Endpoint: /clientes/registrar 
+        const response = await fetch(`${API_BASE_URL}/clientes/registrar`, { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -210,9 +182,8 @@ async function handleRegister(e) {
         if (response.ok) {
             const nuevoCliente = await response.json(); 
             console.log('Registro exitoso:', nuevoCliente);
-            window.location.href = 'login.html'; // Redirige a login
-        } else {
-            // Manejar errores (ej: DNI o email duplicado)
+            alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+            window.location.href = 'login.html'; 
             const error = await response.json();
             console.error('Error en registro:', error);
             alert(`Error: ${error.detail || 'No se pudo completar el registro.'}`);
@@ -225,29 +196,24 @@ async function handleRegister(e) {
 }
 
 
-/**
- * (CONECTAR API) Maneja el envío del formulario de LOGIN
- */
-async function handleLogin(e) {
+// (CONECTAR API) Maneja el envío del formulario de LOGIN
+async function manejarLogin(e) { 
     e.preventDefault();
     
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-
-    // Obtener el elemento de error y ocultarlo
     const loginErrorMsg = document.getElementById('login-error-msg');
-    loginErrorMsg.classList.add('hidden'); // Ocultarlo al re-intentar
-    loginErrorMsg.textContent = ''; // Limpiar texto
+    loginErrorMsg.classList.add('hidden');
+    loginErrorMsg.textContent = ''; 
 
-    // Para FastAPI/OAuth2, se envían datos de formulario
     const formData = new URLSearchParams();
-    formData.append('username', email); // FastAPI espera 'username' para el email
+    formData.append('username', email); 
     formData.append('password', password);
 
     try {
-        // --- CONECTAR API (Login) ---
-        // Endpoint: /clientes/login/token (POST)
-        const response = await fetch(`${API_BASE_URL}/clientes/login/token`, {
+        // CONECTAR API (Login) 
+        // Endpoint: /clientes/iniciar_sesion
+        const response = await fetch(`${API_BASE_URL}/clientes/iniciar_sesion`, { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -256,30 +222,22 @@ async function handleLogin(e) {
         });
 
         if (response.ok) {
-            // Si es exitoso, FastAPI devuelve el 'access_token'
             const data = await response.json();
-            
-            // Guardamos el Token
             localStorage.setItem('userToken', data.access_token);
             
-            // Obtenemos y guardamos los datos del usuario (/me)
-            await fetchAndStoreUserData(data.access_token);
+            // Obtenemos y guardamos los datos del usuario (/yo)
+            await obtenerYGuardarDatosUsuario(data.access_token); 
 
-            // Redirección directa al perfil
             window.location.href = 'profile.html'; 
 
         } else {
             const error = await response.json();
             console.error('Error en login:', error);
-
-            // Mostrar error en la página
             loginErrorMsg.textContent = error.detail || 'Email o contraseña incorrectos.';
             loginErrorMsg.classList.remove('hidden');
         }
     } catch (error) {
         console.error('Error de red:', error);
-        
-        // Mostrar error de red en la página
         loginErrorMsg.textContent = 'Error de conexión. Inténtalo de nuevo.';
         loginErrorMsg.classList.remove('hidden');
     }
@@ -289,15 +247,12 @@ async function handleLogin(e) {
 // FUNCIÓN AUXILIAR (OBTENER DATOS DE USUARIO)
 // ==============================================================================
 
-/**
- * (CONECTAR API) Obtiene datos del usuario (usando el token)
- * y los guarda en localStorage para usarlos en el perfil.
- */
-async function fetchAndStoreUserData(token) {
+// (CONECTAR API) Obtiene datos del usuario (usando el token) y los guarda en localStorage
+async function obtenerYGuardarDatosUsuario(token) { 
     try {
-        // --- CONECTAR API (Obtener datos del usuario) ---
-        // Endpoint: /clientes/me (GET)
-        const response = await fetch(`${API_BASE_URL}/clientes/me`, {
+        // CONECTAR API (Obtener datos del usuario) 
+        // Endpoint: /clientes/yo (GET)
+        const response = await fetch(`${API_BASE_URL}/clientes/yo`, { 
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -306,12 +261,13 @@ async function fetchAndStoreUserData(token) {
 
         if (response.ok) {
             const userData = await response.json();
-            // Guardamos al usuario como un string JSON
             localStorage.setItem('user', JSON.stringify(userData));
         } else {
             throw new Error('No se pudieron cargar los datos del usuario.');
         }
     } catch (error) {
         console.error(error);
+        // Si falla (ej. token expira), limpiamos
+        handleLogout(new Event('click'));
     }
 }

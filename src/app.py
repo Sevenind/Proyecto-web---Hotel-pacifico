@@ -28,7 +28,7 @@ from .services.admin_services import iniciar_sesion_admin
 # ==============================================================================
 app = FastAPI()
 
-# --- Lista de orígenes permitidos (para que el frontend se conecte) ---
+#  Lista de orígenes permitidos (para que el frontend se conecte) 
 origins = [
     "http://localhost",
     "http://localhost:5500",
@@ -37,7 +37,7 @@ origins = [
     "null"
 ]
 
-# --- Aplicar el middleware de CORS ---
+#  Aplicar el middleware de CORS 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  
@@ -47,12 +47,12 @@ app.add_middleware(
 )
 
 # ==============================================================================
-# ESQUEMAS (PYDANTIC MODELS)
+# ESQUEMAS (PYDANTIC MODELS) - EN ESPAÑOL
 # ==============================================================================
 
-# --- Esquemas de Cliente ---
+#  Esquemas de Cliente 
 
-class ClienteCreate(BaseModel):
+class ClienteCrear(BaseModel):
     dni: int
     nombre: str
     apellido: str
@@ -60,7 +60,7 @@ class ClienteCreate(BaseModel):
     password: str
     telefono: int    
 
-class ClienteUpdate(BaseModel):
+class ClienteActualizar(BaseModel):
     email: Optional[EmailStr] = None
     telefono: Optional[int] = None
     password: Optional[str] = None
@@ -75,24 +75,24 @@ class ClientePublico(BaseModel):
     class Config:
          from_attributes = True
              
-# --- Esquemas de Habitación (para anidar en Reservas) ---
+#  Esquemas de Habitación (para anidar en Reservas) 
              
-class TipoHabitacionInfo(BaseModel):
+class InfoTipoHabitacion(BaseModel):
     nombre_tipo: str
     
     class Config:
          from_attributes = True
 
-class HabitacionInfo(BaseModel):
+class InfoHabitacion(BaseModel):
     numero: str
-    tipo: TipoHabitacionInfo
+    tipo: InfoTipoHabitacion
     
     class Config:
          from_attributes = True
 
-# --- Esquemas de Reserva ---
+#  Esquemas de Reserva 
 
-class ReservaCreate(BaseModel):
+class ReservaCrear(BaseModel):
     tipo_habitacion_id: int
     fecha_checkin: date
     fecha_checkout: date
@@ -104,19 +104,19 @@ class ReservaPublica(BaseModel):
     fecha_checkout: date
     estado_reserva: str
     costo_total: Optional[int] = None
-    habitacion: HabitacionInfo
+    habitacion: InfoHabitacion
 
     class Config:
          from_attributes = True
 
-class ReservaUpdate(BaseModel):
+class ReservaActualizar(BaseModel):
     fecha_checkin: date
     fecha_checkout: date
     total_personas: int
 
-# --- Esquemas de Administración ---
+#  Esquemas de Administración 
     
-class ClienteInfoAdmin(BaseModel):
+class InfoClienteAdmin(BaseModel):
     dni: int
     nombre: str
 
@@ -128,15 +128,15 @@ class ReservaPublicaAdmin(BaseModel):
     fecha_checkin: date
     fecha_checkout: date
     estado_reserva: str
-    habitacion: HabitacionInfo
-    cliente: ClienteInfoAdmin
+    habitacion: InfoHabitacion
+    cliente: InfoClienteAdmin
 
     class Config:
         from_attributes = True
 
-# --- Esquemas de Token (Autenticación) ---
+#  Esquemas de Token (Autenticación) 
 
-class TokenData(BaseModel):
+class DatosToken(BaseModel):
     dni: Optional[int] = None
 
 class Token(BaseModel):
@@ -144,82 +144,86 @@ class Token(BaseModel):
     token_type: str
 
 # ==============================================================================
-# CONFIGURACIÓN DE AUTENTICACIÓN (JWT)
+# CONFIGURACIÓN DE AUTENTICACIÓN (JWT) - EN ESPAÑOL
 # ==============================================================================
 
-#  Define el esquema de seguridad
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/clientes/login/token")
+# Define el esquema de seguridad
+# APUNTAMOS A LA NUEVA RUTA DE LOGIN EN ESPAÑOL
+esquema_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/clientes/iniciar_sesion")
 
 # Constantes de seguridad 
-SECRET_KEY = "tu-clave-secreta-muy-larga-y-dificil-de-adivinar" # ¡Cambia esto en producción!
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 # El token durará 1 hora
+CLAVE_SECRETA = "tu-clave-secreta-muy-larga-y-dificil-de-adivinar" 
+ALGORITMO = "HS256"
+MINUTOS_EXPIRACION_TOKEN = 60 # El token durará 1 hora
 
 # ==============================================================================
-# FUNCIONES HELPERS DE AUTENTICACIÓN
+# FUNCIONES HELPERS DE AUTENTICACIÓN - EN ESPAÑOL
 # ==============================================================================
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def crear_token_acceso(data: dict, expires_delta: Optional[timedelta] = None):
     """Crea un nuevo token JWT."""
-    to_encode = data.copy()
+    a_codificar = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expira = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expira = datetime.utcnow() + timedelta(minutes=MINUTOS_EXPIRACION_TOKEN)
         
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    a_codificar.update({"exp": expira})
+    jwt_codificado = jwt.encode(a_codificar, CLAVE_SECRETA, algorithm=ALGORITMO)
+    return jwt_codificado
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    
-
-    credentials_exception = HTTPException(
+async def obtener_usuario_actual(token: str = Depends(esquema_oauth2)):
+    """
+    Obtiene el usuario cliente actual a partir del token JWT.
+    """
+    excepcion_credenciales = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No se pudieron validar las credenciales",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, CLAVE_SECRETA, algorithms=[ALGORITMO])
         dni: str = payload.get("sub") 
         if dni is None:
-            raise credentials_exception
-        token_data = TokenData(dni=int(dni))
+            raise excepcion_credenciales
+        datos_token = DatosToken(dni=int(dni))
         
     except JWTError:
-        raise credentials_exception
+        raise excepcion_credenciales
     
-    usuario = Cliente.get_or_none(Cliente.dni == token_data.dni)
+    usuario = Cliente.get_or_none(Cliente.dni == datos_token.dni)
     
     if usuario is None:
-        raise credentials_exception
+        raise excepcion_credenciales
         
     return usuario
 
-async def get_current_admin_user(token: str = Depends(oauth2_scheme)):
-   
-   
-    credentials_exception = HTTPException(
+async def obtener_usuario_admin_actual(token: str = Depends(esquema_oauth2)):
+    """
+    Obtiene el usuario admin actual a partir del token JWT.
+    Verifica el flag 'is_admin'.
+    """
+    excepcion_credenciales = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No tienes permisos de administrador",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, CLAVE_SECRETA, algorithms=[ALGORITMO])
         username: str = payload.get("sub") 
-        is_admin: bool = payload.get("is_admin", False)
+        es_admin: bool = payload.get("is_admin", False)
         
-        if username is None or is_admin is not True:
-            raise credentials_exception
+        if username is None or es_admin is not True:
+            raise excepcion_credenciales
         
     except JWTError:
-        raise credentials_exception
+        raise excepcion_credenciales
     
     usuario_admin = Admin.get_or_none(Admin.username == username)
     
     if usuario_admin is None:
-        raise credentials_exception
+        raise excepcion_credenciales
         
     return usuario_admin
         
@@ -237,7 +241,7 @@ def inicializar_db():
         print("Tablas verificadas/creadas.")
 
         with db.atomic():
-            # --- Crear Admin por defecto ---
+            #  Crear Admin por defecto 
             if Admin.select().count() == 0:
                 print("Creando usuario admin por defecto (hotelp / admin1234)...")
                 Admin.create(
@@ -306,7 +310,7 @@ def inicializar_db():
         
 # Evento de Inicio
 @app.on_event("startup")
-def startup_event():
+def evento_inicio():
     """Se ejecuta al iniciar la app: Conecta a la BD e inicializa."""
     if db.is_closed():
         db.connect()
@@ -314,7 +318,7 @@ def startup_event():
 
 # Evento de Cierre
 @app.on_event("shutdown")
-def shutdown_event():
+def evento_cierre():
     """Se ejecuta al apagar la app: Cierra la conexión a la BD."""
     if not db.is_closed():
         db.close()
@@ -322,24 +326,24 @@ def shutdown_event():
 
 
 # ==============================================================================
-# ENDPOINTS DE LA API
+# ENDPOINTS DE LA API (RUTAS Y FUNCIONES EN ESPAÑOL)
 # ==============================================================================
 
-# Endpoints de Cliente 
+#  Endpoints de Cliente 
 
-@app.post("/api/v1/clientes/register", response_model=ClientePublico)
-def endpoint_registrar_cliente(cliente_data: ClienteCreate):
+@app.post("/api/v1/clientes/registrar", response_model=ClientePublico)
+def endpoint_registrar_cliente(datos_cliente: ClienteCrear):
     """Endpoint para registrar un nuevo cliente."""
     
-    print(f"Recibida petición de registro para DNI: {cliente_data.dni}")
+    print(f"Recibida petición de registro para DNI: {datos_cliente.dni}")
     try:
         nuevo_cliente = registrar_cliente(
-            dni=cliente_data.dni,
-            nombre=cliente_data.nombre,
-            apellido=cliente_data.apellido,
-            email=cliente_data.email,
-            password=cliente_data.password,
-            telefono=cliente_data.telefono
+            dni=datos_cliente.dni,
+            nombre=datos_cliente.nombre,
+            apellido=datos_cliente.apellido,
+            email=datos_cliente.email,
+            password=datos_cliente.password,
+            telefono=datos_cliente.telefono
         )
         if not nuevo_cliente:
             raise HTTPException(
@@ -355,21 +359,23 @@ def endpoint_registrar_cliente(cliente_data: ClienteCreate):
             detail=f"Error interno del servidor: {e}"
         )
 
-@app.get("/api/v1/clientes/me", response_model=ClientePublico)
-def endpoint_read_users_me(current_user: Cliente = Depends(get_current_user)):
+@app.get("/api/v1/clientes/yo", response_model=ClientePublico)
+def endpoint_obtener_datos_usuario(
+    usuario_actual: Cliente = Depends(obtener_usuario_actual)
+):
     """Endpoint protegido para obtener los datos del usuario logueado."""
-    return current_user
+    return usuario_actual
 
 @app.put("/api/v1/clientes/{dni_cliente}", response_model=ClientePublico)
 def endpoint_modificar_cliente(
     dni_cliente: int,
-    data: ClienteUpdate,
-    current_user: Cliente = Depends(get_current_user)
+    datos: ClienteActualizar,
+    usuario_actual: Cliente = Depends(obtener_usuario_actual)
 ):
     """Endpoint protegido para modificar los datos del usuario logueado."""
     
     #  Verificación de seguridad 
-    if dni_cliente != current_user.dni:
+    if dni_cliente != usuario_actual.dni:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes permiso para modificar este usuario"
@@ -377,10 +383,10 @@ def endpoint_modificar_cliente(
     
     try:
         cliente_actualizado = modificar_cliente_datos(
-            dni_cliente=current_user.dni,
-            email=data.email,
-            telefono=data.telefono,
-            password=data.password
+            dni_cliente=usuario_actual.dni,
+            email=datos.email,
+            telefono=datos.telefono,
+            password=datos.password
         )
         if not cliente_actualizado:
             raise HTTPException(
@@ -396,15 +402,17 @@ def endpoint_modificar_cliente(
             detail=f"Error interno del servidor: {e}"
         )
 
-# --- Endpoints de Autenticación (Login Tokens) ---
+#  Endpoints de Autenticación (Login Tokens) 
         
-@app.post("/api/v1/clientes/login/token", response_model=Token)
-def endpoint_login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+@app.post("/api/v1/clientes/iniciar_sesion", response_model=Token)
+def endpoint_login_para_token_cliente(
+    datos_formulario: OAuth2PasswordRequestForm = Depends()
+):
     """Endpoint de Login para Clientes."""
     
     cliente = iniciar_sesion(
-        email=form_data.username, 
-        password=form_data.password
+        email=datos_formulario.username, 
+        password=datos_formulario.password
     )
     if not cliente:
         raise HTTPException(
@@ -413,21 +421,23 @@ def endpoint_login_for_access_token(form_data: OAuth2PasswordRequestForm = Depen
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # --- Crear Token de Cliente ---
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
+    #  Crear Token de Cliente 
+    expiracion_token = timedelta(minutes=MINUTOS_EXPIRACION_TOKEN)
+    token_acceso = crear_token_acceso(
         data={"sub": str(cliente.dni)}, # Guardamos el DNI en el token
-        expires_delta=access_token_expires
+        expires_delta=expiracion_token
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": token_acceso, "token_type": "bearer"}
 
-@app.post("/api/v1/admin/login/token", response_model=Token)
-def endpoint_admin_login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+@app.post("/api/v1/admin/iniciar_sesion", response_model=Token)
+def endpoint_login_para_token_admin(
+    datos_formulario: OAuth2PasswordRequestForm = Depends()
+):
     """Endpoint de Login SÓLO para Administradores."""
     
     admin = iniciar_sesion_admin(
-        username=form_data.username, 
-        password=form_data.password
+        username=datos_formulario.username, 
+        password=datos_formulario.password
     )
     if not admin:
         raise HTTPException(
@@ -437,31 +447,31 @@ def endpoint_admin_login_for_access_token(form_data: OAuth2PasswordRequestForm =
         )
     
     # Crear Token de Admin 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
+    expiracion_token = timedelta(minutes=MINUTOS_EXPIRACION_TOKEN)
+    token_acceso = crear_token_acceso(
         data={"sub": admin.username, "is_admin": True}, # Guardamos flag de admin
-        expires_delta=access_token_expires
+        expires_delta=expiracion_token
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": token_acceso, "token_type": "bearer"}
 
 
-# Endpoints de Reservas (Cliente) 
+#  Endpoints de Reservas (Cliente) 
 
 @app.post("/api/v1/reservas/", response_model=ReservaPublica)
 def endpoint_crear_reserva(
-    reserva_data: ReservaCreate, 
-    current_user: Cliente = Depends(get_current_user)
+    datos_reserva: ReservaCrear, 
+    usuario_actual: Cliente = Depends(obtener_usuario_actual)
 ):
     """Endpoint protegido para crear una nueva reserva"""
     
-    print(f"Recibida petición de reserva de DNI: {current_user.dni}")
+    print(f"Recibida petición de reserva de DNI: {usuario_actual.dni}")
     try:
         nueva_reserva = crear_reserva(
-            dni_cliente=current_user.dni,
-            tipo_habitacion_id=reserva_data.tipo_habitacion_id,
-            fecha_checkin=reserva_data.fecha_checkin,
-            fecha_checkout=reserva_data.fecha_checkout,
-            total_personas=reserva_data.total_personas
+            dni_cliente=usuario_actual.dni,
+            tipo_habitacion_id=datos_reserva.tipo_habitacion_id,
+            fecha_checkin=datos_reserva.fecha_checkin,
+            fecha_checkout=datos_reserva.fecha_checkout,
+            total_personas=datos_reserva.total_personas
         )
         if not nueva_reserva:
             raise HTTPException(
@@ -476,32 +486,32 @@ def endpoint_crear_reserva(
             detail=f"Error interno del servidor: {e}"
         )
         
-@app.get("/api/v1/reservas/me", response_model=List[ReservaPublica])
+@app.get("/api/v1/reservas/mis_reservas", response_model=List[ReservaPublica])
 def endpoint_obtener_reservas_del_usuario(
-    current_user: Cliente = Depends(get_current_user)
+    usuario_actual: Cliente = Depends(obtener_usuario_actual)
 ):
     """Endpoint protegido para obtener la LISTA de reservas del usuario logueado."""
     
-    print(f"Buscando reservas para el DNI: {current_user.dni}")
-    reservas = obtener_reservas_por_cliente(dni_cliente=current_user.dni)
+    print(f"Buscando reservas para el DNI: {usuario_actual.dni}")
+    reservas = obtener_reservas_por_cliente(dni_cliente=usuario_actual.dni)
     return reservas
 
 @app.put("/api/v1/reservas/{reserva_id}", response_model=ReservaPublica)
 def endpoint_modificar_reserva(
     reserva_id: int,
-    reserva_data: ReservaUpdate,
-    current_user: Cliente = Depends(get_current_user)
+    datos_reserva: ReservaActualizar,
+    usuario_actual: Cliente = Depends(obtener_usuario_actual)
 ):
     """Endpoint protegido para modificar una reserva existente."""
     
-    print(f"Modificando reserva {reserva_id} para DNI: {current_user.dni}")
+    print(f"Modificando reserva {reserva_id} para DNI: {usuario_actual.dni}")
     try:
         reserva_modificada = modificar_reserva(
             reserva_id=reserva_id,
-            dni_cliente=current_user.dni,
-            nueva_fecha_checkin=reserva_data.fecha_checkin,
-            nueva_fecha_checkout=reserva_data.fecha_checkout,
-            nuevo_total_personas=reserva_data.total_personas
+            dni_cliente=usuario_actual.dni,
+            nueva_fecha_checkin=datos_reserva.fecha_checkin,
+            nueva_fecha_checkout=datos_reserva.fecha_checkout,
+            nuevo_total_personas=datos_reserva.total_personas
         )
         if not reserva_modificada:
             raise HTTPException(
@@ -519,15 +529,15 @@ def endpoint_modificar_reserva(
 @app.delete("/api/v1/reservas/{reserva_id}", response_model=ReservaPublica)
 def endpoint_cancelar_reserva(
     reserva_id: int,
-    current_user: Cliente = Depends(get_current_user)
+    usuario_actual: Cliente = Depends(obtener_usuario_actual)
 ):
     """Endpoint protegido para cancelar (cambiar estado) una reserva."""
     
-    print(f"Cancelando reserva {reserva_id} para DNI: {current_user.dni}")
+    print(f"Cancelando reserva {reserva_id} para DNI: {usuario_actual.dni}")
     try:
         reserva_cancelada = cancelar_reserva(
             reserva_id=reserva_id,
-            dni_cliente=current_user.dni
+            dni_cliente=usuario_actual.dni
         )
         if not reserva_cancelada:
             raise HTTPException(
@@ -542,12 +552,12 @@ def endpoint_cancelar_reserva(
             detail=f"Error interno del servidor: {e}"
         )
 
-# Endpoints de Administración (Búsquedas)
+#  Endpoints de Administración (Búsquedas)   
 
 @app.get("/api/v1/admin/reservas/cliente/{dni}", response_model=List[ReservaPublicaAdmin])
 def endpoint_admin_buscar_por_dni(
     dni: int,
-    current_user: Admin = Depends(get_current_admin_user) 
+    usuario_admin: Admin = Depends(obtener_usuario_admin_actual) 
 ):
     """ Admin busca todas las reservas de un DNI de cliente específico"""
     
@@ -560,7 +570,7 @@ def endpoint_admin_buscar_por_dni(
 def endpoint_admin_buscar_por_fechas(
     fecha_inicio: date,
     fecha_fin: date,
-    current_user: Admin = Depends(get_current_admin_user) 
+    usuario_admin: Admin = Depends(obtener_usuario_admin_actual) 
 ):
     """[Admin] Busca todas las reservas entre un rango de fechas."""
     

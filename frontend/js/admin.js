@@ -1,58 +1,43 @@
-// NOTA DE SEGURIDAD:
-// En un proyecto real, la página de Admin debería estar protegida
-// por un 'rol' de administrador, no solo por estar logueado.
-// Tu API de FastAPI debería verificar ese rol.
-
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- (CAMBIO 1) ---
-    // Protección simple: Busca el 'adminToken' que creamos
     const token = localStorage.getItem('adminToken');
     if (!token) {
-        // (CAMBIO 2) Si no lo tiene, lo manda al login de admin
-        window.location.href = 'admin-login.html';
+        // Importante si no hay token de admin, lo enviamos al login de admin
+        window.location.href = 'admin-login.html'; 
         return;
     }
-    // --- (FIN DE CAMBIOS) ---
 
-    // Listeners para los formularios de búsqueda (esto queda igual)
-    document.getElementById('search-dni-form').addEventListener('submit', searchByDni);
-    document.getElementById('search-date-form').addEventListener('submit', searchByDate);
+    document.getElementById('search-dni-form').addEventListener('submit', buscarPorDni); 
+    document.getElementById('search-date-form').addEventListener('submit', buscarPorFecha); 
 });
 
-async function searchByDni(e) {
+// Busca reservas por el DNI del cliente
+async function buscarPorDni(e) { 
     e.preventDefault();
     const dni = document.getElementById('search-dni').value;
     
-    // --- CONECTAR API ---
-    // Endpoint: /admin/reservas/cliente/{dni}
+    // CONECTAR API 
     const url = `${API_BASE_URL}/admin/reservas/cliente/${dni}`;
     
-    await fetchAndDisplayReservations(url);
+    await obtenerYMostrarReservas(url); 
 }
 
-async function searchByDate(e) {
+// Busca reservas por rango de fechas
+async function buscarPorFecha(e) { 
     e.preventDefault();
     const checkin = document.getElementById('search-checkin').value;
     const checkout = document.getElementById('search-checkout').value;
     
-    // --- CONECTAR API ---
-    // Endpoint: /admin/reservas/fechas?fecha_inicio=...&fecha_fin=...
+    // CONECTAR API 
     const url = `${API_BASE_URL}/admin/reservas/fechas?fecha_inicio=${checkin}&fecha_fin=${checkout}`;
 
-    await fetchAndDisplayReservations(url);
+    await obtenerYMostrarReservas(url); 
 }
 
-/**
- * Función genérica para llamar a la API de admin y mostrar resultados
- */
-async function fetchAndDisplayReservations(url) {
+// Función genérica para llamar a la API de admin y mostrar resultados
+async function obtenerYMostrarReservas(url) { 
     
-    // --- (CAMBIO 3) ---
-    // Usa el 'adminToken' para hacer la llamada a la API
     const token = localStorage.getItem('adminToken');
-    // --- (FIN DE CAMBIO) ---
-    
     const tableBody = document.querySelector('#admin-reservations-list tbody');
     const noResultsMsg = document.getElementById('admin-no-results');
 
@@ -64,12 +49,13 @@ async function fetchAndDisplayReservations(url) {
 
         if (response.ok) {
             const reservas = await response.json();
-            tableBody.innerHTML = ''; // Limpiar tabla
+            tableBody.innerHTML = ''; 
 
             if (reservas.length === 0) {
                 noResultsMsg.classList.remove('hidden');
             } else {
                 noResultsMsg.classList.add('hidden');
+                // (Usamos los schemas de Admin que devuelven info del cliente)
                 reservas.forEach(reserva => {
                     const row = `
                         <tr>
@@ -85,11 +71,18 @@ async function fetchAndDisplayReservations(url) {
                 });
             }
         } else {
+             // Si la API falla (ej. 401 Unauthorized), mostramos error
              noResultsMsg.classList.remove('hidden');
              tableBody.innerHTML = '';
-             // El error 401 (No autorizado) de la API de admin
-             // ahora se mostrará aquí
-             alert('Error buscando reservas o no tienes permisos.');
+             
+             // Si el token expiró o es inválido, cerramos sesión
+             if (response.status === 401) {
+                alert('Tu sesión de administrador ha expirado. Por favor, inicia sesión de nuevo.');
+                localStorage.removeItem('adminToken');
+                window.location.href = 'admin-login.html';
+             } else {
+                alert('Error buscando reservas.');
+             }
         }
 
     } catch (error) {
