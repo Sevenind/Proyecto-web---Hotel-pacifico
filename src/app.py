@@ -45,7 +45,7 @@ app.add_middleware(
 )
 
 # ==============================================================================
-# ESQUEMAS (PYDANTIC MODELS) - EN ESPAÑOL
+# ESQUEMAS (PYDANTIC MODELS) 
 # ==============================================================================
 
 #  Esquemas de Cliente 
@@ -142,11 +142,11 @@ class Token(BaseModel):
     token_type: str
 
 # ==============================================================================
-# CONFIGURACIÓN DE AUTENTICACIÓN (JWT) - EN ESPAÑOL
+# CONFIGURACIÓN DE AUTENTICACIÓN (JWT)
 # ==============================================================================
 
 # Define el esquema de seguridad
-# APUNTAMOS A LA NUEVA RUTA DE LOGIN EN ESPAÑOL
+# APUNTAMOS A LA NUEVA RUTA DE LOGIN
 esquema_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/clientes/iniciar_sesion")
 
 # Constantes de seguridad 
@@ -155,7 +155,7 @@ ALGORITMO = "HS256"
 MINUTOS_EXPIRACION_TOKEN = 60 # El token durará 1 hora
 
 # ==============================================================================
-# FUNCIONES HELPERS DE AUTENTICACIÓN - EN ESPAÑOL
+# FUNCIONES HELPERS DE AUTENTICACIÓN 
 # ==============================================================================
 
 def crear_token_acceso(data: dict, expires_delta: Optional[timedelta] = None):
@@ -324,7 +324,7 @@ def evento_cierre():
 
 
 # ==============================================================================
-# ENDPOINTS DE LA API (RUTAS Y FUNCIONES EN ESPAÑOL)
+# ENDPOINTS DE LA API (RUTAS Y FUNCIONES)
 # ==============================================================================
 
 #  Endpoints de Cliente 
