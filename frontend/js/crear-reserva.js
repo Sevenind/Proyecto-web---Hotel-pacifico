@@ -12,6 +12,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reservationForm) {
         reservationForm.addEventListener('submit', manejarNuevaReserva); 
     }
+    const roomTypeSelect = document.getElementById('room-type-select');
+    const guestsInput = document.getElementById('guests');
+
+    if (roomTypeSelect && guestsInput) {
+        
+        // 2. Creamos un 'listener' para el selector de habitación
+        roomTypeSelect.addEventListener('change', (e) => {
+            
+            // 3. Obtenemos la opción seleccionada
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const capacity = selectedOption.getAttribute('data-capacity');
+
+            if (capacity) {
+                // 4. Si hay capacidad, la ponemos como 'max' y habilitamos el input
+                guestsInput.max = capacity;
+                guestsInput.value = 1; // Reseteamos a 1
+                guestsInput.disabled = false;
+                
+            } else {
+                // 5. Si eligen "Seleccione un tipo...", reseteamos y deshabilitamos
+                guestsInput.value = '';
+                guestsInput.disabled = true;
+                guestsInput.removeAttribute('max');
+            }
+        });
+    }
 });
 
 

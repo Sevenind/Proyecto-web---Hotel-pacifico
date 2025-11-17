@@ -564,3 +564,149 @@ body {
     margin-top: 0.5rem;
     font-weight: 500;
 }
+
+/* --- (NUEVO) Estilos para el Menú de Admin (Paneles) --- */
+
+.dashboard-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+.menu-panel {
+    background-color: var(--light-color);
+    padding: 3rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.menu-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.menu-panel h2 {
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+/* --- (NUEVO) Botón para volver --- */
+.btn-back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.btn-back:hover {
+    text-decoration: underline;
+}
+
+/* --- (NUEVO) Modal de Detalle de Cliente --- */
+#client-detail-modal .modal-content {
+    max-width: 650px;
+}
+#client-detail-modal h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+#client-detail-modal h3 {
+    color: var(--primary-color);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+#client-detail-modal-details p {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Estilo para la tabla de reservas dentro del modal */
+#client-detail-modal-reservations {
+    max-height: 250px; /* Para que no se haga gigante */
+    overflow-y: auto;
+}
+
+
+/* --- Estilos para Gestión de Habitaciones --- */
+#gestion-habitaciones-container {
+    display: grid;
+    /* Se mostrará en 2 columnas en pantallas grandes, y 1 en móviles */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+#gestion-habitaciones-container h3 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.habitaciones-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 350px; /* Límite de altura para ~5-6 items */
+    overflow-y: auto;  /* Activa el scroll si la lista es más larga */
+    padding-right: 10px; /* Espacio para que el scroll no tape el contenido */
+}
+
+.habitacion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    background-color: var(--bg-light-grey);
+    border-radius: 5px;
+}
+
+.habitacion-item span {
+    font-weight: 500;
+}
+
+.habitacion-item select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+#admin-habitaciones-view > .dashboard-section > h2 {
+    text-align: center;
+}
+
+/* Ajusta el ancho del nuevo modal */
+#habitaciones-tipo-modal .modal-content {
+    max-width: 450px;
+}
+
+/* Estilo para el título H2 dentro del nuevo modal */
+#modal-habitaciones-titulo {
+    color: var(--primary-color);
+    margin-bottom: 0;
+}
+
+
+/* 1. Centra todo dentro de la vista de habitaciones (incluyendo el botón 'Volver') */
+#admin-habitaciones-view {
+    text-align: center;
+}
+
+/* 2. Resetea la alineación del panel blanco (section) para que su contenido (los paneles) 
+   no hereden el centrado, sino que se alinee a la izquierda (como estaba) */
+#admin-habitaciones-view > .dashboard-section {
+    text-align: left;
+}

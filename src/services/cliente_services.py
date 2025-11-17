@@ -128,3 +128,15 @@ def modificar_cliente_datos(dni_cliente, email=None, telefono=None, password=Non
     except Exception as e:
         print(f"Ocurrió un error inesperado al modificar: {e}")
         return None
+    
+
+def obtener_todos_los_clientes():
+    """
+    (Admin) Obtiene una lista de todos los clientes.
+    """
+    try:
+        # Devuelve una lista de todos los objetos Cliente
+        return list(Cliente.select())
+    except Exception as e:
+        print(f"Error al obtener todos los clientes: {e}")
+        return []

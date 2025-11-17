@@ -25,54 +25,168 @@
             <h1>Panel de Administración</h1>
         </header>
 
-        <section class="dashboard-section">
-            <h2>Buscar Reservas por Cliente</h2>
-            <form id="search-dni-form">
-                <div class="form-group">
-                    <label for="search-dni">DNI del Cliente</label>
-                    <input type="number" id="search-dni" placeholder="12345678" required>
-                </div>
-                <button type="submit" class="btn">Buscar</button>
-            </form>
-        </section>
+        <div id="admin-dashboard-main">
+            <div class="dashboard-menu">
+                <a href="#" class="menu-panel" id="btn-vista-clientes">
+                    <h2>Gestión de Clientes</h2>
+                </a>
+                
+                <a href="#" class="menu-panel" id="btn-vista-reservas">
+                    <h2>Gestión de Reservas</h2>
+                </a>
+                <a href="#" class="menu-panel" id="btn-vista-habitaciones">
+                    <h2>Gestión de Habitaciones</h2>
+                </a>
+            </div>
 
-        <section class="dashboard-section">
-            <h2>Buscar Reservas por Fechas</h2>
-            <form id="search-date-form">
-                <div class="form-group">
-                    <label for="search-checkin">Desde (Check-in)</label>
-                    <input type="date" id="search-checkin" required>
-                </div>
-                <div class="form-group">
-                    <label for="search-checkout">Hasta (Check-out)</label>
-                    <input type="date" id="search-checkout" required>
-                </div>
-                <button type="submit" class="btn">Buscar</button>
-            </form>
-        </section>
+        </div>
 
-        <section class="dashboard-section">
-            <h2>Resultados de Búsqueda</h2>
-            <div id="admin-reservations-list">
+        <div id="admin-client-view" class="hidden">
+            <a href="#" class="btn-back" data-vista="main">&larr; Volver al Menú</a>
+            
+            <section class="dashboard-section">
+                <h2>Buscar Clientes</h2>
+                <form id="search-client-form">
+                    <div class="form-group" style="display: flex; gap: 1rem;">
+                        <select id="search-client-type" style="width: 30%;">
+                            <option value="dni">DNI</option>
+                            <option value="nombre_apellido">Nombre y Apellido</option>
+                            <option value="email">Email</option>
+                        </select>
+                        <input type="text" id="search-client-value" placeholder="Escribe tu búsqueda..." style="width: 70%;">
+                    </div>
+                    </form>
+            </section>
+            
+            <section class="dashboard-section">
+                <h2>Listado de Clientes</h2>
+                <div id="client-list">
+                    <table class="reservations-table">
+                        <thead>
+                            <tr>
+                                <th>DNI</th>
+                                <th>Nombre y Apellido</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                    <p id="client-list-no-results" class="hidden">No se encontraron clientes.</p>
+                </div>
+            </section>
+        </div>
+
+        <div id="admin-reservation-view" class="hidden">
+            <a href="#" class="btn-back" data-vista="main">&larr; Volver al Menú</a>
+            
+            <section class="dashboard-section">
+                <h2>Buscar Reservas por Fechas</h2>
+                <form id="search-date-form">
+                    <div class="form-group">
+                        <label for="search-checkin">Desde (Check-in)</label>
+                        <input type="date" id="search-checkin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-checkout">Hasta (Check-out)</label>
+                        <input type="date" id="search-checkout" required>
+                    </div>
+                    <button type="submit" class="btn">Buscar</button>
+                </form>
+            </section>
+
+            <section class="dashboard-section">
+                <h2>Resultados de Búsqueda</h2>
+                <div id="admin-reservations-list">
+                    <table class="reservations-table" id="reservation-results-table">
+                        <thead>
+                            <tr>
+                                <th>ID Reserva</th>
+                                <th>Cliente (DNI)</th>
+                                <th>Habitación</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <p id="admin-no-results" class="hidden">No se encontraron reservas con esos criterios.</p>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <div id="client-detail-modal" class="modal-container hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="close-client-modal">&times;</button>
+            
+            <h2>Datos del Cliente</h2>
+            <div id="client-detail-modal-details">
+                </div>
+
+            <h3>Reservas Activas</h3>
+            <div id="client-detail-modal-reservations">
                 <table class="reservations-table">
                     <thead>
                         <tr>
-                            <th>ID Reserva</th>
-                            <th>Cliente (DNI)</th>
+                            <th>ID</th>
                             <th>Habitación</th>
                             <th>Check-in</th>
                             <th>Check-out</th>
-                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
                         </tbody>
                 </table>
-                <p id="admin-no-results" class="hidden">No se encontraron reservas con esos criterios.</p>
+                <p id="modal-no-reservations" class="hidden">Este cliente no tiene reservas activas.</p>
             </div>
-        </section>
-
+        </div>
     </div>
+
+    <div id="habitaciones-tipo-modal" class="modal-container hidden">
+        <div class="modal-content">
+             <button class="modal-close-btn" id="close-habitaciones-modal">&times;</button>
+        
+             <h2 id="modal-habitaciones-titulo">Cargando...</h2>
+        
+            <div id="modal-habitaciones-lista" class="habitaciones-lista" style="margin-top: 1.5rem;">
+             </div>
+        </div>
+    </div>
+
+    <div id="admin-habitaciones-view" class="hidden">
+    <a href="#" class="btn-back" data-vista="main">&larr; Volver al Menú</a>
+    
+    <section class="dashboard-section">
+        <h2>Gestión de Estado de Habitaciones</h2>
+       
+        
+        <div class="dashboard-menu" id="habitaciones-menu-paneles">
+    
+            <a href="#" class="menu-panel btn-abrir-modal-hab" data-tipo-id="1" data-tipo-nombre="Normal (King Size)">
+                <h2>Normal (King Size)</h2>
+             </a>
+    
+            <a href="#" class="menu-panel btn-abrir-modal-hab" data-tipo-id="2" data-tipo-nombre="Individual">
+                <h2>Individual</h2>
+             </a>
+    
+            <a href="#" class="menu-panel btn-abrir-modal-hab" data-tipo-id="3" data-tipo-nombre="Grande (Familiar)">
+                <h2>Grande (Familiar)</h2>
+            </a>
+    
+            <a href="#" class="menu-panel btn-abrir-modal-hab" data-tipo-id="4" data-tipo-nombre="Suite">
+                <h2>Suite</h2>
+            </a>
+        </div>
+    </section>
+</div>
+    
 
     <script src="js/main.js"></script>
     <script src="js/admin.js"></script>

@@ -26,28 +26,32 @@
             <h2>Crear Nueva Reserva</h2>
             <form id="new-reservation-form">
                 <div class="form-group">
-                    <label for="checkin">Fecha de Check-in</label>
-                    <input type="date" id="checkin" required>
-                </div>
-                <div class="form-group">
-                    <label for="checkout">Fecha de Check-out</label>
-                    <input type="date" id="checkout" required>
-                </div>
-                <div class="form-group">
-                    <label for="guests">Total de Personas</label>
-                    <input type="number" id="guests" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="room-type-select">Tipo de Habitación</label>
-                    <select id="room-type-select" required>
-                        <option value="">Seleccione un tipo...</option>
-                        <option value="1">Normal (King Size)</option>
-                        <option value="2">Individual</option>
-                        <option value="3">Grande (Familiar)</option>
-                        <option value="4">Suite</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Buscar Disponibilidad y Reservar</button>
+        <label for="checkin">Fecha de Check-in</label>
+        <input type="date" id="checkin" required>
+    </div>
+    <div class="form-group">
+        <label for="checkout">Fecha de Check-out</label>
+        <input type="date" id="checkout" required>
+    </div>
+
+    <div class="form-group">
+        <label for="room-type-select">Tipo de Habitación</label>
+        <select id="room-type-select" required>
+            <option value="">Seleccione un tipo...</option>
+            
+            <option value="1" data-capacity="2">Normal (King Size) (Máx. 2)</option>
+            <option value="2" data-capacity="1">Individual (Máx. 1)</option>
+            <option value="3" data-capacity="4">Grande (Familiar) (Máx. 4)</option>
+            <option value="4" data-capacity="3">Suite (Máx. 3)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="guests">Total de Personas</label>
+        <input type="number" id="guests" min="1" required disabled>
+    </div>
+    
+    <button type="submit" class="btn">Buscar Disponibilidad y Reservar</button>
             </form>
         </section>
 

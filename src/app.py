@@ -11,7 +11,8 @@ from .models import Cliente, TipoHabitacion, Habitacion, Reserva, Admin
 from .services.cliente_services import (
     registrar_cliente, 
     iniciar_sesion, 
-    modificar_cliente_datos
+    modificar_cliente_datos,
+    obtener_todos_los_clientes
 )
 from .services.reserva_services import (
     crear_reserva,
@@ -19,10 +20,13 @@ from .services.reserva_services import (
     modificar_reserva,
     cancelar_reserva,
     obtener_reservas_por_dni_admin,
-    obtener_reservas_por_fechas_admin
+    obtener_reservas_por_fechas_admin,
 )
-from .services.admin_services import iniciar_sesion_admin
-
+from .services.admin_services import (
+    iniciar_sesion_admin,
+    admin_obtener_todas_las_habitaciones,
+    admin_actualizar_estado_habitacion  
+)
 # ==============================================================================
 # CONFIGURACIÓN DE APP Y CORS
 # ==============================================================================
@@ -76,6 +80,7 @@ class ClientePublico(BaseModel):
 #  Esquemas de Habitación (para anidar en Reservas) 
              
 class InfoTipoHabitacion(BaseModel):
+    id: int
     nombre_tipo: str
     
     class Config:
@@ -84,6 +89,14 @@ class InfoTipoHabitacion(BaseModel):
 class InfoHabitacion(BaseModel):
     numero: str
     tipo: InfoTipoHabitacion
+    
+    class Config:
+         from_attributes = True
+
+class TipoHabitacionPublico(BaseModel):
+    id: int
+    nombre_tipo: str
+    capacidad_maxima: int
     
     class Config:
          from_attributes = True
@@ -131,6 +144,22 @@ class ReservaPublicaAdmin(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class ClienteDetalleAdmin(BaseModel):
+    cliente: ClientePublico
+    reservas: List[ReservaPublicaAdmin]
+    
+class HabitacionAdminPublica(BaseModel):
+    id: int
+    numero: str
+    estado: str
+    tipo: InfoTipoHabitacion 
+
+    class Config:
+         from_attributes = True
+
+class HabitacionEstadoUpdate(BaseModel):
+    estado: str # Esperamos 'Activa' o 'Mantenimiento'
 
 #  Esquemas de Token (Autenticación) 
 
@@ -326,6 +355,14 @@ def evento_cierre():
 # ==============================================================================
 # ENDPOINTS DE LA API (RUTAS Y FUNCIONES)
 # ==============================================================================
+
+app.get("/api/v1/tipos-habitacion", response_model=List[TipoHabitacionPublico])
+def endpoint_obtener_tipos_habitacion():
+    """
+    Devuelve una lista de todos los tipos de habitación (público).
+    Usado para el formulario de crear reserva.
+    """
+    return obtener_todos_los_tipos_habitacion()
 
 #  Endpoints de Cliente 
 
@@ -564,6 +601,38 @@ def endpoint_admin_buscar_por_dni(
     return reservas
 
 
+@app.get("/api/v1/admin/clientes/{dni}", response_model=ClienteDetalleAdmin)
+def endpoint_admin_buscar_cliente_por_dni(
+    dni: int,
+    usuario_admin: Admin = Depends(obtener_usuario_admin_actual) 
+):
+    """ [Admin] Busca un cliente por DNI y devuelve sus datos + reservas activas. """
+    
+    print(f"Búsqueda [Admin] de CLIENTE por DNI: {dni}")
+    cliente = Cliente.get_or_none(Cliente.dni == dni)
+    
+    if not cliente:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente no encontrado"
+        )
+    reservas = obtener_reservas_por_dni_admin(dni_cliente=dni)
+    
+    return {"cliente": cliente, "reservas": reservas}
+
+
+@app.get("/api/v1/admin/clientes", response_model=List[ClientePublico])
+def endpoint_admin_obtener_todos_los_clientes(
+    usuario_admin: Admin = Depends(obtener_usuario_admin_actual)
+):
+    """ [Admin] Obtiene una lista de todos los clientes. """
+    
+    print("Listado [Admin] de todos los clientes")
+    clientes = obtener_todos_los_clientes()
+    return clientes
+
+
+
 @app.get("/api/v1/admin/reservas/fechas", response_model=List[ReservaPublicaAdmin])
 def endpoint_admin_buscar_por_fechas(
     fecha_inicio: date,
@@ -578,3 +647,43 @@ def endpoint_admin_buscar_por_fechas(
         fecha_fin=fecha_fin
     )
     return reservas
+
+@app.get("/api/v1/admin/habitaciones", response_model=List[HabitacionAdminPublica])
+def endpoint_admin_obtener_todas_las_habitaciones(
+    usuario_admin: Admin = Depends(obtener_usuario_admin_actual)
+):
+    """
+    [Admin] Obtiene una lista de TODAS las habitaciones del hotel y su estado.
+    """
+    try:
+        habitaciones = admin_obtener_todas_las_habitaciones()
+        return habitaciones
+    except Exception as e:
+        print(f"Error en endpoint_admin_obtener_todas_las_habitaciones: {e}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {e}")
+
+
+@app.put("/api/v1/admin/habitaciones/{habitacion_id}/estado", response_model=HabitacionAdminPublica)
+def endpoint_admin_actualizar_estado_habitacion(
+    habitacion_id: int,
+    datos: HabitacionEstadoUpdate,
+    usuario_admin: Admin = Depends(obtener_usuario_admin_actual) 
+):
+    """
+    [Admin] Actualiza el estado de una habitación (ej: 'Activa', 'Mantenimiento')
+    NO valida conflictos, simplemente ejecuta el cambio.
+    """
+    
+    habitacion_actualizada, mensaje_error = admin_actualizar_estado_habitacion(
+        habitacion_id=habitacion_id,
+        nuevo_estado=datos.estado
+    )
+    
+    if not habitacion_actualizada:
+        # Si no se encontró la habitación o el estado es inválido
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=mensaje_error
+        )
+        
+    return habitacion_actualizada
